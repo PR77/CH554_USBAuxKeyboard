@@ -1,0 +1,295 @@
+/********************************** (C) COPYRIGHT *******************************
+* File Name     : KEYBOARD.C
+* Author        : Paul Raspa (PR77)
+* License       : MIT
+* Version       : V1.0
+* Date          : 2025/10/23
+* Description   : CH554 Amiga Keyboard Emulation
+*******************************************************************************/
+
+#include <stdint.h>
+#include <compiler.h>
+#include <string.h>
+#include <stdlib.h>
+#include "ch554.h"
+#include "keyboard.h"
+#include "keyboard_cfg.h"
+#include "keyboard_layout.h"
+#include "system.h"
+#include "tick.h"
+#include "serial.h"
+
+SBIT(KBCLOCK, KBCLOCK_PORT, KBCLOCK_PIN);
+SBIT(KBDATA, KBDATA_PORT, KBDATA_PIN);
+SBIT(KBRESET, KBRESET_PORT, KBRESET_PIN);
+SBIT(KBSTATUS, KBSTATUS_PORT, KBSTATUS_PIN);
+SBIT(KBINUSE, KBINUSE_PORT, KBINUSE_PIN);
+
+#undef KEYBOARD_DEBUG_ENABLED
+#define STROBE_DELAY_NORM   15
+#define STROBE_DELAY_LONG   20
+#define STROBE_KBCLOCK() { system_mDelayuS(STROBE_DELAY_NORM); KBCLOCK = 0; system_mDelayuS(STROBE_DELAY_NORM); KBCLOCK = 1; system_mDelayuS(STROBE_DELAY_LONG); }
+
+static const keymapLayout_s keycodeTranslation[KEYCODE_TO_AMIGA_ENTERIES] = {DE_KEYCODE_TO_AMIGA};
+static const keymapLayout_s modifierTranslation[MODIFIER_TO_AMIGA_ENTERIES] = {DE_MODIFIER_TO_AMIGA};
+static __xdata devTypeKeyboardPayload_s previousRawKeyCodeReport;
+static __xdata keyboardHandlerSt_e keyboardHandlerState;
+static __xdata uint32_t keyCodeSendWaitTime;
+
+static __xdata uint8_t keyboard_queueKeyBuffer[KEY_QUEUE_BUFFER_SIZE];
+static __xdata uint8_t keyboard_queueWriteIndex;
+static __xdata uint8_t keyboard_queueReadIndex;
+
+void keyboard_initialise(void) {
+
+    KBCLOCK_MOD_OC = KBCLOCK_MOD_OC & ~(1 << KBCLOCK_PIN);
+    KBCLOCK_DIR_PU = KBCLOCK_DIR_PU | (1 << KBCLOCK_PIN);
+
+    // KBDATA PIN needs to be bi-directional - so use the quasi-bidirectional mode.
+    KBDATA_MOD_OC = KBDATA_MOD_OC | (1 << KBDATA_PIN);
+    KBDATA_DIR_PU = KBDATA_DIR_PU | (1 << KBDATA_PIN);
+
+    KBRESET_MOD_OC = KBRESET_MOD_OC & ~(1 << KBRESET_PIN);
+    KBRESET_DIR_PU = KBRESET_DIR_PU | (1 << KBRESET_PIN);
+    KBRESET = 1;
+
+    KBSTATUS_MOD_OC = KBSTATUS_MOD_OC | (1 << KBSTATUS_PIN);
+    KBSTATUS_DIR_PU = KBSTATUS_DIR_PU | (1 << KBSTATUS_PIN);
+
+    KBINUSE_MOD_OC = KBINUSE_MOD_OC | (1 << KBINUSE_PIN);
+    KBINUSE_DIR_PU = KBINUSE_DIR_PU | (1 << KBINUSE_PIN);
+
+    keyboard_queueWriteIndex = 0;
+    keyboard_queueReadIndex = 0;
+
+    keyboardHandlerState = kbStateIdle;
+
+    memset(&previousRawKeyCodeReport, 0, sizeof(devTypeKeyboardPayload_s));
+    memset(&keyboard_queueKeyBuffer, 0, sizeof(keyboard_queueKeyBuffer));
+}
+
+void keyboard_deinitialise(void) {
+    
+    KBRESET = 1;
+    KBDATA = 1;
+    KBCLOCK = 1;
+    keyboardHandlerState = kbStateIdle;
+}
+
+void keyboard_cyclicHanlder(void) {
+
+    // TODO: There seems to be a 10ms delay between subsequent key transmissions.
+    // Need to check queue content.
+
+    switch (keyboardHandlerState) {
+        case (kbStateIdle): {
+            if (keyboard_queueWriteIndex != keyboard_queueReadIndex) {
+                // Keycode is waiting in the queue to be transmitted.
+                keyboardHandlerState = kbStateSendKeyCode;
+            }
+        }
+        break;
+    
+        case (kbStateSendKeyCode): {
+            uint8_t keyCodeToSend = keyboard_queueKeyBuffer[keyboard_queueReadIndex];
+            keyboard_queueReadIndex = (keyboard_queueReadIndex + 1) & KEY_QUEUE_BUFFER_MASK;
+
+            //         _____   ___   ___   ___   ___   ___   ___   ___   _________
+            // KBCLOCK      \_/   \_/   \_/   \_/   \_/   \_/   \_/   \_/
+            //         ___________________________________________________________
+            // KBDATA     \_____X_____X_____X_____X_____X_____X_____X_____/
+            //           (6)   (5)   (4)   (3)   (2)   (1)   (0)   (7)
+            //
+            //          First                                     Last
+            //          sent                                      sent
+
+            // Code taken from repo here: https://github.com/PR77/PS2_Keyboard_Adapter
+
+            KBDATA = 1;
+            KBCLOCK = 1;
+
+            for (uint8_t i = 0, z = 0x80; i < 8; i++) {
+                KBDATA = (keyCodeToSend & z) ? 0 : 1;
+                STROBE_KBCLOCK();
+
+                z = z >> 1 ;
+            }
+            
+            KBDATA = 1;
+            KBCLOCK = 1;
+            keyCodeSendWaitTime = tick_get1msTimerCount();
+            keyboardHandlerState = kbStateWait;
+        }
+        break;
+
+        case (kbStateWait): {
+            if ((tick_get1msTimerCount() - keyCodeSendWaitTime) > INTER_KEY_DELAY_TO_AMIGA_MS) {
+                keyboardHandlerState = kbStateIdle;
+            }
+        }
+        break;
+
+        default: {
+            keyboardHandlerState = kbStateIdle;
+        }
+        break;
+    }
+}
+
+uint8_t keyboard_translateKey(devTypeKeyboardPayload_s *rawKeyCodeReport, const keymapLayout_s **decodedKeyCode) {
+
+    uint8_t foundEntry = 0;
+
+    // NULL pointer check - this function is called with the address of RxBuffer
+    // and need to ensure this buffer is not at 0.
+    if (NULL == rawKeyCodeReport) {
+        return (0);
+    }
+
+    // NULL pointer check
+    if (NULL == decodedKeyCode) {
+        return (0);
+    }
+
+    *decodedKeyCode = NULL;
+    
+    if (rawKeyCodeReport->modifierKeys != previousRawKeyCodeReport.modifierKeys) {
+        // Check if there has been a modifier key pressed or released. Modifier key
+        // are bit encoded.
+        
+        // TODO: This only currently handles 1 modifier beening pressed at a time.
+        
+        if ((rawKeyCodeReport->modifierKeys != 0) && (previousRawKeyCodeReport.modifierKeys == 0)) {
+            // Key was pressed. Send key pressed sequence to Amiga.            
+            for (uint8_t i = 0; i < MODIFIER_TO_AMIGA_ENTERIES; i++) {
+                if (rawKeyCodeReport->modifierKeys == modifierTranslation[i].rawKeyCode) {
+                    //keyboard_sendKey(modifierTranslation[i].amigaKeyCode, kbKeyPressed);
+                    keyboard_queueKey(modifierTranslation[i].amigaKeyCode, kbKeyPressed);
+                    *decodedKeyCode = &modifierTranslation[i];
+                    foundEntry = 1;
+                    break;
+                }
+            }
+        } else if ((rawKeyCodeReport->modifierKeys == 0) && (previousRawKeyCodeReport.modifierKeys != 0)) {
+            // Key was released. Send key released sequence to Amiga.
+            for (uint8_t i = 0; i < MODIFIER_TO_AMIGA_ENTERIES; i++) {
+                if (previousRawKeyCodeReport.modifierKeys == modifierTranslation[i].rawKeyCode) {
+                    //keyboard_sendKey(modifierTranslation[i].amigaKeyCode, kbKeyReleased);
+                    keyboard_queueKey(modifierTranslation[i].amigaKeyCode, kbKeyReleased);
+                    break;
+                }
+            }
+        } else {
+            // Do nothing...
+        }
+    }
+
+    // IMPORTANT: If multiple keys are pressed and released, the order of the keycodes
+    // in the report can change. So each key needs to be specifically checked in the report.
+
+    for (uint8_t i = 0; i < MAX_SUPPORTED_ACTIVE_KEYCODES; i++) {
+        // Itterate through all the keycodes in the keyboard data report. First check for
+        // new key pressed or key releases.
+        if ((rawKeyCodeReport->keyCodes[i] != 0) &&
+            (!keyboard_findKeyCodeInReport(&previousRawKeyCodeReport, rawKeyCodeReport->keyCodes[i]))) {
+            // Key was pressed, queue key code to send to Amiga.
+            for (uint8_t j = 0; j < KEYCODE_TO_AMIGA_ENTERIES; j++) {
+                if (rawKeyCodeReport->keyCodes[i] == keycodeTranslation[j].rawKeyCode) {
+                    keyboard_queueKey(keycodeTranslation[j].amigaKeyCode, kbKeyPressed);
+                    *decodedKeyCode = &keycodeTranslation[j];
+                    foundEntry = 1;
+                    break;
+                }
+            }
+
+        } else if ((previousRawKeyCodeReport.keyCodes[i] != 0) &&
+            (!keyboard_findKeyCodeInReport(rawKeyCodeReport, previousRawKeyCodeReport.keyCodes[i]))) {
+            // Key was released, queue release key code to send to Amiga.
+            for (uint8_t j = 0; j < KEYCODE_TO_AMIGA_ENTERIES; j++) {
+                if (previousRawKeyCodeReport.keyCodes[i] == keycodeTranslation[j].rawKeyCode) {
+                    keyboard_queueKey(keycodeTranslation[j].amigaKeyCode, kbKeyReleased);
+                    break;
+                }
+            }
+        } else {
+            // Do nothing...
+        }
+    }
+
+    memcpy(&previousRawKeyCodeReport, rawKeyCodeReport, sizeof(devTypeKeyboardPayload_s));
+
+    return (foundEntry);
+}
+
+keyboardReset_e keyboard_translateReset(uint8_t rawModifierCode) {
+
+    keyboardReset_e resetState = kbResetNotAsserted;
+    
+    // Amiga /RESET will be asserted when the following modifiers
+    // are all active;
+    // {KEY_MOD_LCTRL } /* LEFT-CONTROL */
+    // {KEY_MOD_RCTRL } /* RIGHT-CONTROL*/
+    // {KEY_MOD_LMETA } /* LEFT-META    */
+
+    if (rawModifierCode == (KEY_MOD_LCTRL | KEY_MOD_RCTRL | KEY_MOD_LMETA)) {
+        KBRESET = 0;
+        system_mDelayuS(200);
+        KBRESET = 1;
+
+        resetState = kbResetAsserted;
+    }
+
+    return (resetState);
+}
+
+keyboardStatus_e keyboard_getStatus(void) {
+
+    keyboardStatus_e keyboardStatus = (KBSTATUS) ? kbStatusOn : kbStatusOff;
+    
+    return (keyboardStatus);
+}
+
+keyboardInUse_e keyboard_getInUse(void) {
+
+    keyboardInUse_e keyboardInUse = (KBINUSE) ? kbInUseOn : kbInUseOff;
+
+    return (keyboardInUse);
+}
+
+static void keyboard_queueKey(uint8_t amigaKeyCode, keyboardKey_e pressedReleased) {
+
+    uint8_t nextWriteIndex = (keyboard_queueWriteIndex + 1) & KEY_QUEUE_BUFFER_MASK;
+    uint8_t keyCodeToQueue = 0;
+
+    if (nextWriteIndex == keyboard_queueReadIndex) {
+        // Queue is full, simply drop the entry and return.
+        return;
+    }
+
+    keyCodeToQueue = (amigaKeyCode << 1);
+    keyCodeToQueue |= (pressedReleased == kbKeyPressed) ? 0x00 : 0x01;
+
+#if defined(KEYBOARD_DEBUG_ENABLED)
+    serial_printString("KEY Queued: Index: ");
+    serial_printHexByte(((keyboard_queueWriteIndex - keyboard_queueReadIndex) & KEY_QUEUE_BUFFER_MASK));
+    serial_printString(", Keycode: ");
+    serial_printHexByte(keyCodeToQueue);
+    serial_printCharacter('\n');
+#endif
+
+    keyboard_queueKeyBuffer[keyboard_queueWriteIndex] = keyCodeToQueue;
+    keyboard_queueWriteIndex = nextWriteIndex;
+}
+
+static inline uint8_t keyboard_findKeyCodeInReport(devTypeKeyboardPayload_s *rawKeyCodeReport, uint8_t keyCode) {
+    // This is directly from the USB HID Keyboard PICO example. Can be found here
+    // https://github.com/raspberrypi/pico-examples/blob/master/usb/host/host_cdc_msc_hid/hid_app.c
+
+    for (uint8_t i = 0; i < MAX_SUPPORTED_ACTIVE_KEYCODES; i++) {
+        if (rawKeyCodeReport->keyCodes[i] == keyCode) {
+            return (keyCode);
+        }
+    }
+    
+    return (0);
+}
