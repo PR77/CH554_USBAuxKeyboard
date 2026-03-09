@@ -26,9 +26,9 @@
 // Protocol Delays
 // ===================================================================================
 // There are three essential conditions:
-// - T0H (HIGH-time for "0"-bit) must be max.  500ns
-// - T1H (HIGH-time for "1"-bit) must be min.  625ns
-// - TCT (total clock time) must be      min. 1150ns
+// - T0H (HIGH-time for "0"-bit) must be max.  350ns +/- 150ns
+// - T1H (HIGH-time for "1"-bit) must be min.  900ns +/- 150ns
+// - TCT (total clock time) must be      min. 1250ns +/- 150ns
 // The bit transmission loop takes 11 clock cycles.
 #if FREQ_SYS == 24000000        // 24 MHz system clock
   #define T1H_DELAY \
@@ -42,14 +42,14 @@
     nop             \
     nop             \
     nop             \
-    nop                         // 15 - 4 = 11 clock cycles for min 625ns
+    nop                         // 15 - 4 = 11 clock cycles for min 900ns
   #define TCT_DELAY \
     nop             \
     nop             \
     nop             \
     nop             \
     nop             \
-    nop                         // 28 - 11 - 11 = 6 clock cycles for min 1150ns
+    nop                         // 28 - 11 - 11 = 6 clock cycles for min 1250ns
 #elif FREQ_SYS == 16000000      // 16 MHz system clock
   #define T1H_DELAY \
     nop             \
@@ -166,12 +166,14 @@ static void ws2812_sendByte(uint8_t data) {
         mov  r7, #8             ; 2 CLK - 8 bits to transfer
         xch  a, dpl             ; 2 CLK - data byte -> accu
         01$:
-        rlc  a                  ; 1 CLK - data bit -> carry (MSB first)
         setb _WS2812_LED        ; 2 CLK - WS2812_LED pin HIGH
+        TCT_DELAY               ; x CLK - TCT delay
+        rlc  a                  ; 1 CLK - data bit -> carry (MSB first)
         mov  _WS2812_LED, c     ; 2 CLK - "0"-bit? -> WS2812_LED pin LOW now
         T1H_DELAY               ; x CLK - TH1 delay
         clr  _WS2812_LED        ; 2 CLK - "1"-bit? -> WS2812_LED pin LOW a little later
-        TCT_DELAY               ; y CLK - TCT delay
-        djnz r7, 01$            ; 2/4|5|6 CLK - repeat for all bits
+        nop                     ; 1 CLK - "1"-bit? -> keep pin low a little longer
+        nop                     ; 1 CLK - "1"-bit? -> keep pin low a little longer
+        djnz r7, 01$            ; 2/6 CLK - repeat for all bits
     __endasm;
 }

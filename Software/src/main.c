@@ -20,7 +20,7 @@
 #include "ws2812.h"
 #include "rotary.h"
 #include "clickbtn.h"
-#include "usbhid.h"
+#include "device/usbhid.h"
 #include "main_gfx.h"
 
 #define CONSOLE_DEBUG_ENABLED
