@@ -22,8 +22,15 @@
 #include "clickbtn.h"
 #include "device/usbhid.h"
 #include "main_gfx.h"
+#include "menu.h"
 
-#define CONSOLE_DEBUG_ENABLED
+#undef CONSOLE_DEBUG_ENABLED
+#define CONSOLE_MENU_ENABLED
+
+#if defined(CONSOLE_DEBUG_ENABLED) && defined(CONSOLE_MENU_ENABLED)
+#error Only CONSOLE_DEBUG_ENABLED or CONSOLE_MENU_ENABLED can be enabled. Please disable one of the configurations
+#endif
+
 #define LED_FLASH_RATE_MS       300
 #define WELCOME_SCREEN_DELAY_MS 800
 #define LOG(msg)                {serial_printString(__FILE__); serial_printCharacter(' '); serial_printHexWord(__LINE__); serial_printCharacter(' '); serial_printString(msg); serial_printString("\n\r");}
@@ -81,10 +88,10 @@ void main(void) {
     // Setup heartbeat LED
     heartbeat_initialise();
 
-#if defined(CONSOLE_DEBUG_ENABLED)
+#if defined(CONSOLE_DEBUG_ENABLED) || defined (CONSOLE_MENU_ENABLED)
     // Setup serial port (debug)
     serial_initialiseSerial1(SERIAL_BAUD_RATE, 0);
-#endif // CONSOLE_DEBUG_ENABLED
+#endif // CONSOLE_DEBUG_ENABLED or CONSOLE_MENU_ENABLED
 
     // Setup i2c and SSD1306 OLED
     i2c_initialise();
@@ -110,9 +117,11 @@ void main(void) {
     ws2812_initialise();
     ws2812_displayFullWheelColour(brightness25Percent);
 
-#if defined(CONSOLE_DEBUG_ENABLED)
     serial_printString("\x1b[2J\x1b[HWCH554 AUX KEYBOARD INTERFACE RUNNING...\n\r");
-#endif // CONSOLE_DEBUG_ENABLED
+
+#if defined(CONSOLE_MENU_ENABLED)
+    menu_initialise();
+#endif // CONSOLE_MENU_ENABLED
     
     // Display welcome message and basic HMI elements
     ssd1306_drawBmp(96, 0, 32, 32, bmpImageList[0]);
@@ -135,6 +144,15 @@ void main(void) {
             serial_printCharacter((char)characterToEcho);    
         }
 #endif // CONSOLE_DEBUG_ENABLED
+
+#if defined(CONSOLE_MENU_ENABLED)
+        uint16_t consoleCharacter = serial_getCharacter(0);
+
+        if ((consoleCharacter != RECEIVE_TIMEOUT) && (consoleCharacter != RECEIVE_NO_DATA_AVAIL)) {
+            serial_printCharacter((char)consoleCharacter);    
+            menu_cyclicHandler((char)consoleCharacter);    
+        }
+#endif // CONSOLE_MENU_ENABLED
 
         if (bootloader_checkBootloaderRequest()) {
             ws2812_initialise();
