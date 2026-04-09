@@ -14,12 +14,13 @@
 #include "ch554.h"
 
 #define MENU_COMMAND_PROMPT_CHARACTER   '>'
-#define NUMBER_OF_MENU_ENTERIES         2   //sizeof(menuEntries) / sizeof(menuEntry_s)
+#define NUMBER_OF_MENU_ENTERIES         3   //sizeof(menuEntries) / sizeof(menuEntry_s)
 
 extern const menuEntry_s menuEntries[];
 
 void menu_printCommandPrompt(void);
 void menu_printCommandOverview(char *argument);
 void menu_rotaryStepSize(char *argument);
+void menu_coldReboot(char *argument);
 
 #endif // __CH554_MENU_CFG_H__

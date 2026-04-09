@@ -17,8 +17,9 @@
 #include "menu_cfg.h"
 
 const menuEntry_s menuEntries[] = {
-    {"h", "Display available commands\n", menu_printCommandOverview},
+    {"h", "Display command overview\n", menu_printCommandOverview},
     {"s", "Rotary step size\n", menu_rotaryStepSize},
+    {"r", "Reset\n", menu_coldReboot}
 };
 
 static uint16_t rotaryStepSize = 0;
@@ -60,4 +61,13 @@ void menu_rotaryStepSize(char *argument) {
         serial_printHexWord(rotaryStepSize);
         serial_printCharacter('\n');        
     }
+}
+
+void menu_coldReboot(char *argument) {
+
+    (void)argument;
+
+    SAFE_MOD = 0x55;
+    SAFE_MOD = 0xAA;
+    GLOBAL_CFG |= bSW_RESET;
 }
