@@ -7,11 +7,12 @@ This design has not been compliance tested and will not be. It may cause persona
 # Overview
 This project is essentially an open source macro pad which emulates a USB Keyboard, Mouse and Comsumer Device. Additionally, there is an OUT USB end point supported to allow for HOST communication back to the device. My target is to make this easily configurable so different functions can be added to the Rotary Encoder, Push Buttons and OLED display. I'm using this project as an opportunity to learn more about the WCH55x micro controller.
 
-# Appearance Breadboard Version
-Infos comming
-
 # Appearance Final PCB Version
-Infos comming
+PCB version has been routed and ready for manufacture. Gerbers are not yet published until I have checked the PCB for issues. Here is the usual 3D artwork of the design.
+
+![PCB](/Images/USBAuxKeyboardPCBTHCTop.png)
+![PCB](/Images/USBAuxKeyboardPCBTop.png)
+![PCB](/Images/USBAuxKeyboardPCBBottom.png)
 
 # Credits
 I refacted a lot of the original libraries into various software components. However there were some repos which provided me with excellent information, tools and resources;
