@@ -14,6 +14,7 @@
 #include "ch554.h"
 #include "menu.h"
 #include "menu_cfg.h"
+#include "menu_helper.h"
 
 static __xdata uint8_t commandBuffer[MENU_COMMAND_BUFFER_SIZE];
 static __xdata uint8_t commandBufferIndex;
