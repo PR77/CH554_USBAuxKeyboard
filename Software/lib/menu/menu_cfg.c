@@ -17,6 +17,8 @@
 #include "menu_cfg.h"
 #include "menu_helper.h"
 
+#define NUMBER_OF_MENU_ENTERIES     sizeof(menuEntries) / sizeof(menuEntry_s)
+
 const menuEntry_s menuEntries[] = {
     {"h", "Display command overview\n", menu_printCommandOverview},
     {"d", "Dump ROM memory\n", menu_dumpROMMemory},
@@ -24,6 +26,10 @@ const menuEntry_s menuEntries[] = {
     {"s", "Rotary step size\n", menu_rotaryStepSize},
     {"r", "Reset\n", menu_coldReboot}
 };
+
+inline uint8_t menu_getNumberOfMenuEnteries(void) {
+    return (NUMBER_OF_MENU_ENTERIES);
+}
 
 void menu_printCommandPrompt(void) {
  

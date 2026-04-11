@@ -34,7 +34,7 @@ void menu_processCommand(void) {
     if (command != NULL) {
         argument = strtok(NULL, " \r\n");
         
-        for (uint8_t i = 0; i < NUMBER_OF_MENU_ENTERIES; i++) {
+        for (uint8_t i = 0; i < menu_getNumberOfMenuEnteries(); i++) {
             if (strcmp(command, menuEntries[i].commandName) == 0) {
                 if (menuEntries[i].commandHandler != NULL) {
                     menuEntries[i].commandHandler(argument);

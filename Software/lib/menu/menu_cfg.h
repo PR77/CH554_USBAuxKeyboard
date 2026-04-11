@@ -14,10 +14,10 @@
 #include "ch554.h"
 
 #define MENU_COMMAND_PROMPT_CHARACTER   '>'
-#define NUMBER_OF_MENU_ENTERIES         5   //sizeof(menuEntries) / sizeof(menuEntry_s)
 
 extern const menuEntry_s menuEntries[];
 
+inline uint8_t menu_getNumberOfMenuEnteries(void);
 void menu_printCommandPrompt(void);
 void menu_printCommandOverview(char *argument);
 void menu_signalError(void);
