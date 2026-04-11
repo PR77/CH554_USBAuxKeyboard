@@ -56,6 +56,8 @@ void menu_cyclicHandler(char character) {
         if (commandBufferIndex < (MENU_COMMAND_BUFFER_SIZE - 1)) {
             commandBuffer[commandBufferIndex] = character;
             commandBufferIndex++;
+        } else {
+            menu_signalError();
         }
     }
 }

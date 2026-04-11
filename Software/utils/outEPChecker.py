@@ -1,4 +1,5 @@
 import pywinusb.hid as hid
+import time
 
 VENDOR_ID = 0x1209
 PRODUCT_ID = 0x2345
@@ -19,9 +20,10 @@ if device:
     
     try:
         while True:
-            for i in range (0, 255):
+            for i in range (0, 255, 16):
                 report.set_raw_data([4, i])  # first byte is report ID
                 report.send()
+                time.sleep(0.1)
     except KeyboardInterrupt:
         pass
 

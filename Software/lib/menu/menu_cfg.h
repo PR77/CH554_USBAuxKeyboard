@@ -20,6 +20,7 @@ extern const menuEntry_s menuEntries[];
 
 void menu_printCommandPrompt(void);
 void menu_printCommandOverview(char *argument);
+void menu_signalError(void);
 void menu_dumpROMMemory(char *argument);
 void menu_dumpRAMMemory(char *argument);
 void menu_rotaryStepSize(char *argument);

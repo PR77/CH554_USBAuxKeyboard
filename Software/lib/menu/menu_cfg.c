@@ -45,6 +45,11 @@ void menu_printCommandOverview(char *argument) {
     }
 }
 
+void menu_signalError(void) {
+  
+    serial_printCharacter('\a');
+}
+
 void menu_dumpROMMemory(char *argument) {
 
     static uint16_t baseAddress = 0;
