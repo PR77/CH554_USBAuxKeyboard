@@ -61,7 +61,7 @@ void menu_dumpROMMemory(char *argument) {
 
     static uint16_t baseAddress = 0;
     
-    if (*argument == '?') {
+    if ((argument != NULL) && (*argument == '?')) {
         serial_printString("\nUsage: d|D <uint16_t> start address of 32 byte ROM memory block\n");
         return;
     }
@@ -75,15 +75,13 @@ void menu_dumpROMMemory(char *argument) {
 
     menu_dumpHex((__code uint8_t *)baseAddress, (uint16_t)baseAddress, 32);
     baseAddress += 32;
-
-    serial_printCharacter('\n');
 }
 
 void menu_dumpRAMMemory(char *argument) {
 
     static uint16_t baseAddress = 0;
     
-    if (*argument == '?') {
+    if ((argument != NULL) && (*argument == '?')) {
         serial_printString("\nUsage: x|X <uint16_t> start address of 32 byte RAM memory block\n");
         return;
     }
@@ -97,8 +95,6 @@ void menu_dumpRAMMemory(char *argument) {
 
     menu_dumpHex((__xdata uint8_t *)baseAddress, (uint16_t)baseAddress, 32);
     baseAddress += 32;
-
-    serial_printCharacter('\n');
 }
 
 
@@ -106,7 +102,7 @@ void menu_rotaryStepSize(char *argument) {
     
     static uint16_t rotaryStepSize = 0;
     
-    if (*argument == '?') {
+    if ((argument != NULL) && (*argument == '?')) {
         serial_printString("\nUsage: s|S <uint16_t> step size\n");
         return;
     }
@@ -127,7 +123,7 @@ void menu_rotaryStepSize(char *argument) {
 
 void menu_coldReboot(char *argument) {
 
-    if (*argument == '?') {
+    if ((argument != NULL) && (*argument == '?')) {
         serial_printString("\nUsage: r|R Perform a cold reboot of device\n");
         return;
     }

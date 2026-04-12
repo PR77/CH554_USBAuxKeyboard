@@ -21,6 +21,10 @@ uint16_t menu_parseNumericalString(char *s) {
     uint16_t result = 0;
     uint8_t base = 10;
 
+    if (s == NULL) {
+        return result;
+    }
+
     // Detect hex prefix
     if (s[0] == '0' && (s[1] == 'x' || s[1] == 'X')) {
         base = 16;

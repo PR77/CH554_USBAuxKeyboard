@@ -16,6 +16,8 @@
 #include "menu_cfg.h"
 #include "menu_helper.h"
 
+#include "serial.h"
+
 static __xdata uint8_t commandBuffer[MENU_COMMAND_BUFFER_SIZE];
 static __xdata uint8_t commandBufferIndex;
 
@@ -29,16 +31,17 @@ void menu_processCommand(void) {
 
     char *command = 0, *argument = 0;
 
-    command = strtok(commandBuffer, " \r\n");
+    command = strtok(commandBuffer, " ");
 
     if (command != NULL) {
-        argument = strtok(NULL, " \r\n");
-        
+        argument = strtok(NULL, "");
+
         for (uint8_t i = 0; i < menu_getNumberOfMenuEnteries(); i++) {
             if (strcmp(command, menuEntries[i].commandName) == 0) {
                 if (menuEntries[i].commandHandler != NULL) {
                     menuEntries[i].commandHandler(argument);
                 }
+                break;
             }
         }
     }
@@ -48,16 +51,22 @@ void menu_processCommand(void) {
 
 void menu_cyclicHandler(char character) {
 
-    if ((character == '\n') || (character == '\r')) {
+     if (character == '\r') {
         commandBuffer[commandBufferIndex] = 0;
         menu_processCommand();
         commandBufferIndex = 0;
-    } else {
+    } else if (character == '\b') {
+        if (commandBufferIndex > 0) {
+            commandBuffer[commandBufferIndex] = 0;
+            commandBufferIndex--;
+        }
+    }  else {
         if (commandBufferIndex < (MENU_COMMAND_BUFFER_SIZE - 1)) {
             commandBuffer[commandBufferIndex] = character;
             commandBufferIndex++;
         } else {
             menu_signalError();
+            commandBufferIndex = 0;
         }
     }
 }
