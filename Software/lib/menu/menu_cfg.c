@@ -22,10 +22,10 @@
 
 const menuEntry_s menuEntries[] = {
     {"h", "Display command overview\n", menu_printCommandOverview},
-    {"d", "Dump ROM memory\n", menu_dumpROMMemory},
-    {"x", "Dump RAM memory\n", menu_dumpRAMMemory},
-    {"s", "Rotary step size\n", menu_rotaryStepSize},
-    {"r", "Reset\n", menu_coldReboot}
+    {"d", "Dump ROM memory\n",          menu_dumpROMMemory},
+    {"x", "Dump RAM memory\n",          menu_dumpRAMMemory},
+    {"s", "Rotary step size\n",         menu_rotaryStepSize},
+    {"r", "Reset\n",                    menu_coldReboot}
 };
 
 inline uint8_t menu_getNumberOfMenuEnteries(void) {
