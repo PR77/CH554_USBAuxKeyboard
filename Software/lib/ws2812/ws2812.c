@@ -134,8 +134,14 @@ void ws2812_setPixelBrightess(uint8_t pixel, ws2812Brightness_e brightness) {
 
 void ws2812_displayFullWheelColour(ws2812Brightness_e brightness) {
 
+    uint8_t colourStep = 0;
+
+    if (WS2812_PIXEL_COUNT > 1) {
+        colourStep = UINT8_MAX / (WS2812_PIXEL_COUNT - 1);
+    }
+    
     for (uint8_t i = 0; i < WS2812_PIXEL_COUNT; i++) {
-        ws2812_setPixelWheelColour(i, (i * (UINT8_MAX / (WS2812_PIXEL_COUNT - 1))));
+        ws2812_setPixelWheelColour(i, (i * colourStep));
         ws2812_setPixelBrightess(i, brightness);
     }
     ws2812_updatePixels();
