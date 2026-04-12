@@ -10,6 +10,7 @@
 #include <stdint.h>
 #include <compiler.h>
 #include "ch554.h"
+#include "firmware_info.h"
 #include "heartbeat.h"
 #include "system.h"
 #include "tick.h"
@@ -117,7 +118,13 @@ void main(void) {
     ws2812_initialise();
     ws2812_displayFullWheelColour(brightness25Percent);
 
-    serial_printString("\x1b[2J\x1b[HWCH554 AUX KEYBOARD INTERFACE RUNNING...\n\r");
+    serial_printString("\x1b[2J\x1b[H");
+    serial_printString(FW_NAME);
+    serial_printCharacter(' ');
+    serial_printString(FW_VERSION);
+    serial_printCharacter(' ');
+    serial_printString(FW_DESC);
+    serial_printString("\n\r");
 
 #if defined(CONSOLE_MENU_ENABLED)
     menu_initialise();
@@ -126,9 +133,9 @@ void main(void) {
     // Display welcome message and basic HMI elements
     ssd1306_drawBmp(96, 0, 32, 32, bmpImageList[0]);
     ssd1306_setCursor(0, 0);
-    ssd1306_printString(" MACRO PAD OR2 ");
+    ssd1306_printString(FW_SLASH_1);
     ssd1306_setCursor(0, 1);
-    ssd1306_printString("    BY PR77    ");
+    ssd1306_printString(FW_SLASH_2);
     for (uint8_t i = 0; i < NUMBER_OF_HOTKEYS; i++) {
         ssd1306_setCursor(hotKeyHandlers[i].xPositionLabel, hotKeyHandlers[i].yPositionLabel);
         ssd1306_printString(hotKeyHandlers[i].hotkeyLabel);
@@ -149,8 +156,8 @@ void main(void) {
         uint16_t consoleCharacter = serial_getCharacter(0);
 
         if ((consoleCharacter != RECEIVE_TIMEOUT) && (consoleCharacter != RECEIVE_NO_DATA_AVAIL)) {
-            serial_printCharacter((char)consoleCharacter);    
-            menu_cyclicHandler((char)consoleCharacter);    
+            serial_printCharacter((char)consoleCharacter);
+            menu_cyclicHandler((char)consoleCharacter);
         }
 #endif // CONSOLE_MENU_ENABLED
 
