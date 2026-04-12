@@ -13,6 +13,7 @@
 #include <stdlib.h>
 #include "ch554.h"
 #include "serial.h"
+#include "system.h"
 #include "menu.h"
 #include "menu_cfg.h"
 #include "menu_helper.h"
@@ -126,9 +127,10 @@ void menu_rotaryStepSize(char *argument) {
 
 void menu_coldReboot(char *argument) {
 
-    (void)argument;
+    if (*argument == '?') {
+        serial_printString("\nUsage: r|R Perform a cold reboot of device\n");
+        return;
+    }
 
-    SAFE_MOD = 0x55;
-    SAFE_MOD = 0xAA;
-    GLOBAL_CFG |= bSW_RESET;
+    system_coldReboot();
 }
