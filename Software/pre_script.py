@@ -14,7 +14,7 @@ SPLASH_LINE1 = " MACRO PAD OR2 "
 SPLASH_LINE2 = "    BY PR77    "
 
 # ----------------------------
-# Git hash (optional)
+# Git hash
 # ----------------------------
 try:
     git_hash = subprocess.check_output(
@@ -29,6 +29,25 @@ except:
 build_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 # ----------------------------
+# Build number (AUTO INCREMENT)
+# ----------------------------
+BUILD_FILE = ".build_number"
+
+if os.path.exists(BUILD_FILE):
+    with open(BUILD_FILE, "r") as f:
+        try:
+            build_number = int(f.read().strip())
+        except:
+            build_number = 0
+else:
+    build_number = 0
+
+build_number += 1
+
+with open(BUILD_FILE, "w") as f:
+    f.write(str(build_number))
+
+# ----------------------------
 # Generate header file
 # ----------------------------
 os.makedirs("include", exist_ok=True)
@@ -37,14 +56,15 @@ with open("include/firmware_info.h", "w") as f:
     f.write("""#ifndef __CH554_FIRMWARE_INFO_H__
 #define __CH554_FIRMWARE_INFO_H__
 
-#define FW_NAME        "%s"
-#define FW_VERSION     "%s"
-#define FW_DESC        "%s"
-#define FW_MFG         "%s"
-#define FW_SLASH_1     "%s"
-#define FW_SLASH_2     "%s"
-#define FW_GIT         "%s"
-#define FW_BUILD_TIME  "%s"
+#define FW_NAME         "%s"
+#define FW_VERSION      "%s"
+#define FW_DESC         "%s"
+#define FW_MFG          "%s"
+#define FW_SLASH_1      "%s"
+#define FW_SLASH_2      "%s"
+#define FW_GIT          "%s"
+#define FW_BUILD_TIME   "%s"
+#define FW_BUILD_NUMBER %d
 
 #endif // __CH554_FIRMWARE_INFO_H__
 """ % (
@@ -55,5 +75,15 @@ with open("include/firmware_info.h", "w") as f:
     SPLASH_LINE1,
     SPLASH_LINE2,
     git_hash,
-    build_time
+    build_time,
+    build_number
 ))
+    
+print("======================================")
+print("Firmware Build Info")
+print("Name:            ", PROJECT_NAME)
+print("Version:         ", PROJECT_VERSION)
+print("Git:             ", git_hash)
+print("Time:            ", build_time)
+print("Build number:    ", build_number)
+print("======================================")
