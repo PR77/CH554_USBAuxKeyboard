@@ -36,21 +36,22 @@
 #define WELCOME_SCREEN_DELAY_MS 800
 #define LOG(msg)                {serial_printString(__FILE__); serial_printCharacter(' '); serial_printHexWord(__LINE__); serial_printCharacter(' '); serial_printString(msg); serial_printString("\n\r");}
 
-#define NUMBER_OF_HOTKEYS       2
+#define NUMBER_OF_HOTKEYS       sizeof(hotKeyHandlers) / sizeof(hotKeyHandler_s)
 #define CALL_HOTKEY_HANDLER(x)  {if (hotKeyHandlers[x].hotKeyHandlerPtr != NULL) {hotKeyHandlers[x].hotKeyHandlerPtr();}}
 
 typedef void (*hotKeyHandler_t)(void);
 
 typedef struct {
     hotKeyHandler_t hotKeyHandlerPtr;
-    const char __code *hotkeyLabel;
+    char *hotkeyLabel;
     uint8_t xPositionLabel;
     uint8_t yPositionLabel;
 } hotKeyHandler_s;
 
-static __xdata hotKeyHandler_s hotKeyHandlers[NUMBER_OF_HOTKEYS] = {
+static const hotKeyHandler_s hotKeyHandlers[] = {
     // IMPORTANT: Hotkey Label should not exceed 7 characters - otherwise it
     // will not appear correct on display.
+    {usbhib_nullHandler,    "<<NOP>>\n", 4, 2},
     {usbhib_nullHandler,    "<<NOP>>\n", 0, 3},
     {usbhib_nullHandler,    "<<NOP>>\n", 8, 3},
 };
