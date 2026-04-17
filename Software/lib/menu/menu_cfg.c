@@ -42,7 +42,7 @@ void menu_printCommandOverview(char *argument) {
 
     (void)argument;
     
-    serial_printString("\x1b[2J\x1b[H\n");
+    serial_printString(MENU_CLEAR_SCREEN_STRING);
     serial_printString("Command Description ------------------------------------------------------------\n");
     
     for (uint8_t i = 0; i < NUMBER_OF_MENU_ENTERIES; i++) {

@@ -13,6 +13,7 @@
 #include <stdint.h>
 #include "ch554.h"
 
+#define MENU_CLEAR_SCREEN_STRING        "\x1b[2J\x1b[H"
 #define MENU_COMMAND_PROMPT_CHARACTER   '>'
 
 extern const menuEntry_s menuEntries[];
