@@ -12,6 +12,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "ch554.h"
+#include "firmware_info.h"
 #include "usbconstant.h"
 #include "usb.h"
 

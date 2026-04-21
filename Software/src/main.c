@@ -4,7 +4,7 @@
 * License       : MIT
 * Version       : V1.0
 * Date          : 2024/12/17
-* Description   : CH554 AUX KEYBOARD INTERFACE (MACRO PAD OR2)
+* Description   : CH554 AUX KEYBOARD INTERFACE (MACRO PAD OR3)
 *******************************************************************************/
 
 #include <stdint.h>
