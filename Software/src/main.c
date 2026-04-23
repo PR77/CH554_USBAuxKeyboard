@@ -32,29 +32,133 @@
 #error Only CONSOLE_DEBUG_ENABLED or CONSOLE_MENU_ENABLED can be enabled. Please disable one of the configurations
 #endif
 
-#define LED_FLASH_RATE_MS       300
-#define WELCOME_SCREEN_DELAY_MS 800
-#define LOG(msg)                {serial_printString(__FILE__); serial_printCharacter(' '); serial_printHexWord(__LINE__); serial_printCharacter(' '); serial_printString(msg); serial_printString("\n\r");}
+#define LED_FLASH_RATE_MS           300
+#define WELCOME_SCREEN_DELAY_MS     800
+#define LOG(msg)                    {serial_printString(__FILE__); serial_printCharacter(' '); serial_printHexWord(__LINE__); serial_printCharacter(' '); serial_printString(msg); serial_printString("\n\r");}
+#define NUMBER_OF_HOTKEY_HANDLERS   sizeof(hotKeyHandlers) / sizeof(hotKeyHandler_s)
+#define NUMBER_OF_HOTKEY_MAPS       sizeof(hotKeyMap) / sizeof(hotKeyMap_s)
 
-#define NUMBER_OF_HOTKEYS       sizeof(hotKeyHandlers) / sizeof(hotKeyHandler_s)
-#define CALL_HOTKEY_HANDLER(x)  {if (hotKeyHandlers[x].hotKeyHandlerPtr != NULL) {hotKeyHandlers[x].hotKeyHandlerPtr();}}
+typedef enum {
+    rotaryDialClockwise = 0,
+    rotaryDialCounterClockwise,
+    rotaryDialSwitchShort,
+    rotaryDialSwitchLong,
+    macroSwitch1Short,
+    macroSwitch1Long,
+    macroSwitch2Short,
+    macroSwitch2Long,
+    macroSwitch3Short,
+    macroSwitch3Long,
 
-typedef void (*hotKeyHandler_t)(void);
+    NUMBER_OF_PHYSICAL_HOTKEYS
+} physicalHotKey_e;
+
+static char * const physicalHotKeyDescriptions[] = {
+    {"rotaryDialClockwise"},
+    {"rotaryDialCounterClockwise"},
+    {"rotaryDialSwitchShort"},
+    {"rotaryDialSwitchLong"},
+    {"macroSwitch1Short"},
+    {"macroSwitch1Long"},
+    {"macroSwitch2Short"},
+    {"macroSwitch2Long"},
+    {"macroSwitch3Short"},
+    {"macroSwitch3Long"},
+};
+
+// TODO: DATA-Flash table to translate the physicalHotKey number (i.e., enum rotary
+// encoder dial or switch, MACRO SW 1, 2 and 3, etc) to a mapped usbhid_xxx handler.
+// The hotKeyMap would be saved in DATA-Flash and modifable.
 
 typedef struct {
-    hotKeyHandler_t hotKeyHandlerPtr;
+    physicalHotKey_e hotKey;
+    uint8_t hotKeyHandlerIndex;     
+} hotKeyMap_s;
+
+static const hotKeyMap_s hotKeyMap[] = {
+    {rotaryDialClockwise,                       0},
+    {rotaryDialCounterClockwise,                1},
+    {rotaryDialSwitchShort,                     2},
+    {rotaryDialSwitchLong,                      3},
+    {macroSwitch1Short,                         6},
+    {macroSwitch1Long,                          6},
+    {macroSwitch2Short,                         6},
+    {macroSwitch2Long,                          6},
+    {macroSwitch3Short,                         6},
+    {macroSwitch3Long,                          6}         
+};
+
+typedef struct {
+    uint8_t handlerIndex;
+    char *handlerText;
     char *hotkeyLabel;
     uint8_t xPositionLabel;
     uint8_t yPositionLabel;
+    void (*commandHandler)(void);
 } hotKeyHandler_s;
 
 static const hotKeyHandler_s hotKeyHandlers[] = {
-    // IMPORTANT: Hotkey Label should not exceed 7 characters - otherwise it
-    // will not appear correct on display.
-    {usbhib_nullHandler,    "<<NOP>>\n", 4, 2},
-    {usbhib_nullHandler,    "<<NOP>>\n", 0, 3},
-    {usbhib_nullHandler,    "<<NOP>>\n", 8, 3},
+    {0x00,  "usbhid_mouseWheelRotateUp",        NULL,       0, 0, usbhid_mouseWheelRotateUp},
+    {0x01,  "usbhid_mouseWheelRotateDown",      NULL,       0, 0, usbhid_mouseWheelRotateDown},
+    {0x02,  "usbhid_consumerMediaMute",         NULL,       0, 0, usbhid_consumerMediaMute},
+    {0x03,  "usbhid_keyboardLockWorkstation",   NULL,       0, 0, usbhid_keyboardLockWorkstation},
+    {0x04,  "usbhib_nullHandler",               "<<NOP>>",  4, 2, usbhib_nullHandler},
+    {0x05,  "usbhib_nullHandler",               "<<NOP>>",  0, 3, usbhib_nullHandler},
+    {0x06,  "usbhib_nullHandler",               "<<NOP>>",  8, 3, usbhib_nullHandler},
 };
+
+static void main_displayHotKeyMapping(void) {
+
+    uint8_t mappedHotKeyHandlerIndex = 0;
+
+    serial_printString("\nHotkey Mapping -----------------------------------------------------------------\n");
+
+    // Itterate through all of the physical hotkeys
+    for (uint8_t i = 0; i < NUMBER_OF_PHYSICAL_HOTKEYS; i++) {
+        serial_printHexByte(i);
+        serial_printString(":\t");
+
+        if (i != hotKeyMap[i].hotKey) {
+            serial_printString("Mapping ERROR detected");
+        } else {
+            mappedHotKeyHandlerIndex = hotKeyMap[i].hotKeyHandlerIndex;
+            serial_printString(physicalHotKeyDescriptions[i]);
+            serial_printString(" --> ");
+
+            if (NUMBER_OF_HOTKEY_HANDLERS > mappedHotKeyHandlerIndex) {
+                serial_printString(hotKeyHandlers[mappedHotKeyHandlerIndex].handlerText);
+            } 
+        }
+
+        serial_printCharacter('\n');
+    }
+}
+
+static void main_triggerHotKeyHandler(physicalHotKey_e physicalHotKey) {
+
+    uint8_t foundHotKeyHandlerIndex = 0;
+    
+    // TODO: DATA-Flash table to translate the physicalHotKey number (i.e., enum rotary
+    // encoder dial or switch, MACRO SW 1, 2 and 3, etc) to a mapped usbhid_xxx handler.
+    // The hotKeyMap would be saved in DATA-Flash and modifable.
+   
+    for (uint8_t i = 0; i < NUMBER_OF_PHYSICAL_HOTKEYS; i++) {
+        if (hotKeyMap[i].hotKey == physicalHotKey) {
+            foundHotKeyHandlerIndex = hotKeyMap[i].hotKeyHandlerIndex;
+
+            // Quick sanity check to ensure hotKeyHandlerIndex in the mapping structure
+            // actually matches handlerIndex in our support hotkey handlers.
+            if (foundHotKeyHandlerIndex != hotKeyHandlers[foundHotKeyHandlerIndex].handlerIndex) {
+                break;
+            }
+
+            if (hotKeyHandlers[foundHotKeyHandlerIndex].commandHandler != NULL) {
+                hotKeyHandlers[foundHotKeyHandlerIndex].commandHandler();
+            }
+            break;
+        }    
+    }
+}
 
 static void main_epHandler(uint8_t length, __xdata uint8_t *report) __reentrant {
     
@@ -130,6 +234,8 @@ void main(void) {
 #if defined(CONSOLE_MENU_ENABLED)
     menu_initialise();
 #endif // CONSOLE_MENU_ENABLED
+
+    main_displayHotKeyMapping();
     
     // Display welcome message and basic HMI elements
     ssd1306_drawBmp(96, 0, 32, 32, bmpImageList[0]);
@@ -137,9 +243,11 @@ void main(void) {
     ssd1306_printString(FW_SLASH_1);
     ssd1306_setCursor(0, 1);
     ssd1306_printString(FW_SLASH_2);
-    for (uint8_t i = 0; i < NUMBER_OF_HOTKEYS; i++) {
-        ssd1306_setCursor(hotKeyHandlers[i].xPositionLabel, hotKeyHandlers[i].yPositionLabel);
-        ssd1306_printString(hotKeyHandlers[i].hotkeyLabel);
+    for (uint8_t i = 0; i < NUMBER_OF_HOTKEY_HANDLERS; i++) {
+        if (hotKeyHandlers[i].hotkeyLabel != NULL) {
+            ssd1306_setCursor(hotKeyHandlers[i].xPositionLabel, hotKeyHandlers[i].yPositionLabel);
+            ssd1306_printString(hotKeyHandlers[i].hotkeyLabel);
+        }
     } 
 
     // Cyclic loop application code starts here
@@ -181,27 +289,11 @@ void main(void) {
         rotary_cyclicHanlder();
         clickbtn_cyclicHandler();
 
-        if (clickbtn_getButtonState(ROTARY_ENC_SW_INDEX)->clicks == 1) {
-            usbhid_consumerMediaMute();
-        }
-        
-        if (clickbtn_getButtonState(ROTARY_ENC_SW_INDEX)->clicks == 2) {
-            usbhid_keyboardLockWorkstation();
-        }
-
-        if (clickbtn_getButtonState(MACRO_1_SW_INDEX)->clicks == 1) {
-            CALL_HOTKEY_HANDLER(0);
-        }
-        
-        if (clickbtn_getButtonState(MACRO_2_SW_INDEX)->clicks == 1) {
-            CALL_HOTKEY_HANDLER(1);
-        }
-
         currentRotaryDirection = rotary_getDirection();
         if (currentRotaryDirection != noRotation) {
             if (currentRotaryDirection == clockwiseRotation) {
                 currentWS2812Colour += 16;
-                usbhid_mouseWheelRotateUp();
+                main_triggerHotKeyHandler(rotaryDialClockwise);
 
                 if (currentImageIndex >= (sizeof(bmpImageList) / sizeof (bmpImageList[0])) - 1) {
                     currentImageIndex = 0;    
@@ -213,7 +305,7 @@ void main(void) {
 
             if (currentRotaryDirection == counterClockwiseRotation) {
                 currentWS2812Colour -= 16;
-                usbhid_mouseWheelRotateDown();
+                main_triggerHotKeyHandler(rotaryDialCounterClockwise);
 
                 if (currentImageIndex > 0) {
                     currentImageIndex--;
@@ -228,6 +320,38 @@ void main(void) {
                 ws2812_setPixelBrightess(i, brightness25Percent);
             }
             ws2812_updatePixels();
+        }
+
+        if (clickbtn_getButtonState(ROTARY_ENC_SW_INDEX)->clicks > 0) {
+            main_triggerHotKeyHandler(rotaryDialSwitchShort);
+        }
+        
+        if (clickbtn_getButtonState(ROTARY_ENC_SW_INDEX)->clicks < 0) {
+            main_triggerHotKeyHandler(rotaryDialSwitchLong);
+        }
+
+        if (clickbtn_getButtonState(MACRO_1_SW_INDEX)->clicks > 0) {
+            main_triggerHotKeyHandler(macroSwitch1Short);
+        }
+
+        if (clickbtn_getButtonState(MACRO_1_SW_INDEX)->clicks < 0) {
+            main_triggerHotKeyHandler(macroSwitch1Long);
+        }
+
+        if (clickbtn_getButtonState(MACRO_2_SW_INDEX)->clicks > 0) {
+            main_triggerHotKeyHandler(macroSwitch2Short);
+        }
+
+        if (clickbtn_getButtonState(MACRO_2_SW_INDEX)->clicks < 0) {
+            main_triggerHotKeyHandler(macroSwitch2Long);
+        }
+
+        if (clickbtn_getButtonState(MACRO_2_SW_INDEX /*Change to MACRO_2_SW_INDEX in final PCB*/)->clicks > 0) {
+            main_triggerHotKeyHandler(macroSwitch3Short);
+        }
+
+        if (clickbtn_getButtonState(MACRO_2_SW_INDEX /*Change to MACRO_2_SW_INDEX in final PCB*/)->clicks < 0) {
+            main_triggerHotKeyHandler(macroSwitch3Long);
         }
     }
 }

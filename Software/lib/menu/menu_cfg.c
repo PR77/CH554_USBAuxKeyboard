@@ -21,11 +21,11 @@
 #define NUMBER_OF_MENU_ENTERIES     sizeof(menuEntries) / sizeof(menuEntry_s)
 
 const menuEntry_s menuEntries[] = {
-    {"h", "Display command overview\n", menu_printCommandOverview},
-    {"d", "Dump ROM memory\n",          menu_dumpROMMemory},
-    {"x", "Dump RAM memory\n",          menu_dumpRAMMemory},
-    {"s", "Rotary step size\n",         menu_rotaryStepSize},
-    {"r", "Reset\n",                    menu_coldReboot}
+    {"h", "Display command overview",   menu_printCommandOverview},
+    {"d", "Dump ROM memory",            menu_dumpROMMemory},
+    {"x", "Dump RAM memory",            menu_dumpRAMMemory},
+    {"s", "Rotary step size",           menu_rotaryStepSize},
+    {"r", "Reset",                      menu_coldReboot}
 };
 
 inline uint8_t menu_getNumberOfMenuEnteries(void) {
@@ -49,6 +49,7 @@ void menu_printCommandOverview(char *argument) {
         serial_printString(menuEntries[i].commandName);
         serial_printCharacter('\t');
         serial_printString(menuEntries[i].commandText);
+        serial_printCharacter('\n');
     }
 }
 
