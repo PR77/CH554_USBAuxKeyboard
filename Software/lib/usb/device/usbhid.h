@@ -21,6 +21,9 @@
 
 typedef void (*epOutHandler_t)(uint8_t length, __xdata uint8_t *report) __reentrant;
 
+#define LOW_BYTE(x)                 ((uint8_t)((x) & 0xFF))
+#define HIGH_BYTE(x)                ((uint8_t)(((x) >> 8) & 0xFF))
+
 #define USBHID_MOUSE_REPORT_ID      1
 #define USBHID_MOUSE_REPORT_SIZE    5
 
@@ -57,6 +60,10 @@ typedef void (*epOutHandler_t)(uint8_t length, __xdata uint8_t *report) __reentr
 #define CON_MEDIA_STOP              0xB7
 #define CON_MEDIA_EJECT             0xB8
 #define CON_MEDIA_RANDOM            0xB9
+
+#define CON_MEDIA_WWW               0x0223
+#define CON_MEDIA_EDIT              0x01B4
+#define CON_MEDIA_CALC              0x0192
 
 #define CON_MENU                    0x40
 #define CON_MENU_PICK               0x41
@@ -173,6 +180,9 @@ void usbhid_attachEPOutHandler(epOutHandler_t epOutHandlerFunction);
 void usbhid_mouseWheelRotateUp(void);
 void usbhid_mouseWheelRotateDown(void);
 void usbhid_consumerMediaMute(void);
+void usbhid_consumerMediaBrowser(void);
+void usbhid_consumerMediaEditor(void);
+void usbhid_consumerMediaCalculator(void);
 void usbhid_keyboardLockWorkstation(void);
 void usbhib_nullHandler(void);
 

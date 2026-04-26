@@ -35,8 +35,8 @@
 #define LED_FLASH_RATE_MS           300
 #define WELCOME_SCREEN_DELAY_MS     800
 #define LOG(msg)                    {serial_printString(__FILE__); serial_printCharacter(' '); serial_printHexWord(__LINE__); serial_printCharacter(' '); serial_printString(msg); serial_printString("\n\r");}
-#define NUMBER_OF_HOTKEY_HANDLERS   sizeof(hotKeyHandlers) / sizeof(hotKeyHandler_s)
-#define NUMBER_OF_HOTKEY_MAPS       sizeof(hotKeyMap) / sizeof(hotKeyMap_s)
+#define NUMBER_OF_HOTKEY_HANDLERS   (sizeof(hotKeyHandlers) / sizeof(hotKeyHandler_s))
+#define NUMBER_OF_HOTKEY_MAPS       (sizeof(hotKeyMap) / sizeof(hotKeyMap_s))
 
 typedef enum {
     rotaryDialClockwise = 0,
@@ -53,7 +53,7 @@ typedef enum {
     NUMBER_OF_PHYSICAL_HOTKEYS
 } physicalHotKey_e;
 
-static char * const physicalHotKeyDescriptions[] = {
+static const char * const physicalHotKeyDescriptions[NUMBER_OF_PHYSICAL_HOTKEYS] = {
     {"rotaryDialClockwise"},
     {"rotaryDialCounterClockwise"},
     {"rotaryDialSwitchShort"},
@@ -65,6 +65,8 @@ static char * const physicalHotKeyDescriptions[] = {
     {"macroSwitch3Short"},
     {"macroSwitch3Long"},
 };
+
+#define PHYSICAL_HOTKEY_DESC_WIDTH  30
 
 // TODO: DATA-Flash table to translate the physicalHotKey number (i.e., enum rotary
 // encoder dial or switch, MACRO SW 1, 2 and 3, etc) to a mapped usbhid_xxx handler.
@@ -78,14 +80,14 @@ typedef struct {
 static const hotKeyMap_s hotKeyMap[] = {
     {rotaryDialClockwise,                       0},
     {rotaryDialCounterClockwise,                1},
-    {rotaryDialSwitchShort,                     2},
-    {rotaryDialSwitchLong,                      3},
-    {macroSwitch1Short,                         6},
-    {macroSwitch1Long,                          6},
-    {macroSwitch2Short,                         6},
-    {macroSwitch2Long,                          6},
-    {macroSwitch3Short,                         6},
-    {macroSwitch3Long,                          6}         
+    {rotaryDialSwitchShort,                     5},
+    {rotaryDialSwitchLong,                      6},
+    {macroSwitch1Short,                         9},
+    {macroSwitch1Long,                          9},
+    {macroSwitch2Short,                         9},
+    {macroSwitch2Long,                          9},
+    {macroSwitch3Short,                         9},
+    {macroSwitch3Long,                          9}         
 };
 
 typedef struct {
@@ -97,14 +99,18 @@ typedef struct {
     void (*commandHandler)(void);
 } hotKeyHandler_s;
 
+
 static const hotKeyHandler_s hotKeyHandlers[] = {
     {0x00,  "usbhid_mouseWheelRotateUp",        NULL,       0, 0, usbhid_mouseWheelRotateUp},
     {0x01,  "usbhid_mouseWheelRotateDown",      NULL,       0, 0, usbhid_mouseWheelRotateDown},
     {0x02,  "usbhid_consumerMediaMute",         NULL,       0, 0, usbhid_consumerMediaMute},
     {0x03,  "usbhid_keyboardLockWorkstation",   NULL,       0, 0, usbhid_keyboardLockWorkstation},
-    {0x04,  "usbhib_nullHandler",               "<<NOP>>",  4, 2, usbhib_nullHandler},
-    {0x05,  "usbhib_nullHandler",               "<<NOP>>",  0, 3, usbhib_nullHandler},
-    {0x06,  "usbhib_nullHandler",               "<<NOP>>",  8, 3, usbhib_nullHandler},
+    {0x04,  "usbhid_consumerMediaBrowser",      NULL,       0, 0, usbhid_consumerMediaBrowser},
+    {0x05,  "usbhid_consumerMediaEditor",       NULL,       0, 0, usbhid_consumerMediaEditor},
+    {0x06,  "usbhid_consumerMediaCalculator",   NULL,       0, 0, usbhid_consumerMediaCalculator},
+    {0x07,  "usbhib_nullHandler",               "<<NOP>>",  4, 2, usbhib_nullHandler},
+    {0x08,  "usbhib_nullHandler",               "<<NOP>>",  0, 3, usbhib_nullHandler},
+    {0x09,  "usbhib_nullHandler",               "<<NOP>>",  8, 3, usbhib_nullHandler},
 };
 
 static void main_displayHotKeyMapping(void) {
@@ -118,11 +124,11 @@ static void main_displayHotKeyMapping(void) {
         serial_printHexByte(i);
         serial_printString(":\t");
 
-        if (i != hotKeyMap[i].hotKey) {
+        if (i != (uint8_t)hotKeyMap[i].hotKey) {
             serial_printString("Mapping ERROR detected");
         } else {
             mappedHotKeyHandlerIndex = hotKeyMap[i].hotKeyHandlerIndex;
-            serial_printString(physicalHotKeyDescriptions[i]);
+            serial_printStringPadded(physicalHotKeyDescriptions[i], PHYSICAL_HOTKEY_DESC_WIDTH);
             serial_printString(" --> ");
 
             if (NUMBER_OF_HOTKEY_HANDLERS > mappedHotKeyHandlerIndex) {
@@ -143,7 +149,7 @@ static void main_triggerHotKeyHandler(physicalHotKey_e physicalHotKey) {
     // The hotKeyMap would be saved in DATA-Flash and modifable.
    
     for (uint8_t i = 0; i < NUMBER_OF_PHYSICAL_HOTKEYS; i++) {
-        if (hotKeyMap[i].hotKey == physicalHotKey) {
+        if (physicalHotKey == hotKeyMap[i].hotKey) {
             foundHotKeyHandlerIndex = hotKeyMap[i].hotKeyHandlerIndex;
 
             // Quick sanity check to ensure hotKeyHandlerIndex in the mapping structure

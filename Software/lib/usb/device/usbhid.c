@@ -145,6 +145,51 @@ void usbhid_consumerMediaMute(void) {
     usbhid_ep1SendReport(usbhid_consumerReport, USBHID_CONSUMER_REPORT_SIZE);
 }
 
+void usbhid_consumerMediaBrowser(void) {
+
+    // Consumer key press
+    usbhid_consumerReport[0] = USBHID_CONSUMER_REPORT_ID;
+    usbhid_consumerReport[1] = LOW_BYTE(CON_MEDIA_WWW);
+    usbhid_consumerReport[2] = HIGH_BYTE(CON_MEDIA_WWW);
+    usbhid_ep1SendReport(usbhid_consumerReport, USBHID_CONSUMER_REPORT_SIZE);
+
+    // Consumer key release
+    usbhid_consumerReport[0] = USBHID_CONSUMER_REPORT_ID;
+    usbhid_consumerReport[1] = 0;
+    usbhid_consumerReport[2] = 0;
+    usbhid_ep1SendReport(usbhid_consumerReport, USBHID_CONSUMER_REPORT_SIZE);
+}
+
+void usbhid_consumerMediaEditor(void) {
+
+    // Consumer key press
+    usbhid_consumerReport[0] = USBHID_CONSUMER_REPORT_ID;
+    usbhid_consumerReport[1] = LOW_BYTE(CON_MEDIA_EDIT);
+    usbhid_consumerReport[2] = HIGH_BYTE(CON_MEDIA_EDIT);
+    usbhid_ep1SendReport(usbhid_consumerReport, USBHID_CONSUMER_REPORT_SIZE);
+
+    // Consumer key release
+    usbhid_consumerReport[0] = USBHID_CONSUMER_REPORT_ID;
+    usbhid_consumerReport[1] = 0;
+    usbhid_consumerReport[2] = 0;
+    usbhid_ep1SendReport(usbhid_consumerReport, USBHID_CONSUMER_REPORT_SIZE);
+}
+
+void usbhid_consumerMediaCalculator(void) {
+
+    // Consumer key press
+    usbhid_consumerReport[0] = USBHID_CONSUMER_REPORT_ID;
+    usbhid_consumerReport[1] = LOW_BYTE(CON_MEDIA_CALC);
+    usbhid_consumerReport[2] = HIGH_BYTE(CON_MEDIA_CALC);
+    usbhid_ep1SendReport(usbhid_consumerReport, USBHID_CONSUMER_REPORT_SIZE);
+
+    // Consumer key release
+    usbhid_consumerReport[0] = USBHID_CONSUMER_REPORT_ID;
+    usbhid_consumerReport[1] = 0;
+    usbhid_consumerReport[2] = 0;
+    usbhid_ep1SendReport(usbhid_consumerReport, USBHID_CONSUMER_REPORT_SIZE);
+}
+
 void usbhid_keyboardLockWorkstation(void) {
 
     // Keyboard key press

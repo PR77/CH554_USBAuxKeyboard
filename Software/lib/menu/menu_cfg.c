@@ -18,7 +18,7 @@
 #include "menu_cfg.h"
 #include "menu_helper.h"
 
-#define NUMBER_OF_MENU_ENTERIES     sizeof(menuEntries) / sizeof(menuEntry_s)
+#define NUMBER_OF_MENU_ENTERIES     (sizeof(menuEntries) / sizeof(menuEntry_s))
 
 const menuEntry_s menuEntries[] = {
     {"h", "Display command overview",   menu_printCommandOverview},
