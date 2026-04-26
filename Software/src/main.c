@@ -24,6 +24,7 @@
 #include "device/usbhid.h"
 #include "main_gfx.h"
 #include "menu.h"
+#include "nvm.h"
 
 #undef CONSOLE_DEBUG_ENABLED
 #define CONSOLE_MENU_ENABLED
@@ -99,7 +100,6 @@ typedef struct {
     void (*commandHandler)(void);
 } hotKeyHandler_s;
 
-
 static const hotKeyHandler_s hotKeyHandlers[] = {
     {0x00,  "usbhid_mouseWheelRotateUp",        NULL,       0, 0, usbhid_mouseWheelRotateUp},
     {0x01,  "usbhid_mouseWheelRotateDown",      NULL,       0, 0, usbhid_mouseWheelRotateDown},
@@ -113,7 +113,39 @@ static const hotKeyHandler_s hotKeyHandlers[] = {
     {0x09,  "usbhib_nullHandler",               "<<NOP>>",  8, 3, usbhib_nullHandler},
 };
 
-static void main_displayHotKeyMapping(void) {
+#define HOTKEY_HANDLER_DESC_WIDTH   35
+#define HOTKEY_HANDLER_LABEL_WIDTH  7
+
+void main_displayHotKeyHandlers(void) {
+
+    uint8_t mappedHotKeyHandlerIndex = 0;
+
+    serial_printString("\nHotkey Handlers ----------------------------------------------------------------\n");
+
+    // Itterate through all of the hotkeys handlers
+    for (uint8_t i = 0; i < NUMBER_OF_HOTKEY_HANDLERS; i++) {
+        serial_printHexByte(i);
+        serial_printString(":\t");
+
+        if (i != hotKeyHandlers[i].handlerIndex) {
+            serial_printString("Mapping ERROR detected");
+        } else {        
+            serial_printHexByte(hotKeyHandlers[i].handlerIndex);
+            serial_printString(":\t");
+            serial_printStringPadded(hotKeyHandlers[i].handlerText, HOTKEY_HANDLER_DESC_WIDTH);
+            serial_printString(": ");
+            serial_printStringPadded(hotKeyHandlers[i].hotkeyLabel, HOTKEY_HANDLER_LABEL_WIDTH);
+            serial_printString(" : ");
+            serial_printHexByte(hotKeyHandlers[i].xPositionLabel);
+            serial_printCharacter(' ');
+            serial_printHexByte(hotKeyHandlers[i].yPositionLabel);
+        }
+        
+        serial_printCharacter('\n');
+    }
+}
+
+void main_displayHotKeyMapping(void) {
 
     uint8_t mappedHotKeyHandlerIndex = 0;
 
@@ -222,6 +254,9 @@ void main(void) {
     usbhid_initialise();
     usbhid_attachEPOutHandler(main_epHandler);
 
+    // Setup NVM (Data flash) handler
+    nvm_initialise();
+
     // Enable global interrupts
     system_enableGlobalInterupts();
 
@@ -241,6 +276,7 @@ void main(void) {
     menu_initialise();
 #endif // CONSOLE_MENU_ENABLED
 
+    main_displayHotKeyHandlers();
     main_displayHotKeyMapping();
     
     // Display welcome message and basic HMI elements
