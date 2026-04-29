@@ -184,6 +184,6 @@ void usbhid_consumerMediaBrowser(void);
 void usbhid_consumerMediaEditor(void);
 void usbhid_consumerMediaCalculator(void);
 void usbhid_keyboardLockWorkstation(void);
-void usbhib_nullHandler(void);
+void usbhid_nullHandler(void);
 
 #endif // __CH554_USB_HID_H__

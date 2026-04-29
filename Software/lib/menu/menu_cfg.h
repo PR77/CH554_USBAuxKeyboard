@@ -25,6 +25,7 @@ void menu_signalError(void);
 void menu_dumpROMMemory(char *argument);
 void menu_dumpRAMMemory(char *argument);
 void menu_rotaryStepSize(char *argument);
+void menu_modifyHotKeyMap(char *argument);
 void menu_coldReboot(char *argument);
 
 #endif // __CH554_MENU_CFG_H__

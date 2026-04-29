@@ -25,6 +25,7 @@
 #include "main_gfx.h"
 #include "menu.h"
 #include "nvm.h"
+#include "hotkeys.h"
 
 #undef CONSOLE_DEBUG_ENABLED
 #define CONSOLE_MENU_ENABLED
@@ -36,167 +37,6 @@
 #define LED_FLASH_RATE_MS           300
 #define WELCOME_SCREEN_DELAY_MS     800
 #define LOG(msg)                    {serial_printString(__FILE__); serial_printCharacter(' '); serial_printHexWord(__LINE__); serial_printCharacter(' '); serial_printString(msg); serial_printString("\n\r");}
-#define NUMBER_OF_HOTKEY_HANDLERS   (sizeof(hotKeyHandlers) / sizeof(hotKeyHandler_s))
-#define NUMBER_OF_HOTKEY_MAPS       (sizeof(hotKeyMap) / sizeof(hotKeyMap_s))
-
-typedef enum {
-    rotaryDialClockwise = 0,
-    rotaryDialCounterClockwise,
-    rotaryDialSwitchShort,
-    rotaryDialSwitchLong,
-    macroSwitch1Short,
-    macroSwitch1Long,
-    macroSwitch2Short,
-    macroSwitch2Long,
-    macroSwitch3Short,
-    macroSwitch3Long,
-
-    NUMBER_OF_PHYSICAL_HOTKEYS
-} physicalHotKey_e;
-
-static const char * const physicalHotKeyDescriptions[NUMBER_OF_PHYSICAL_HOTKEYS] = {
-    {"rotaryDialClockwise"},
-    {"rotaryDialCounterClockwise"},
-    {"rotaryDialSwitchShort"},
-    {"rotaryDialSwitchLong"},
-    {"macroSwitch1Short"},
-    {"macroSwitch1Long"},
-    {"macroSwitch2Short"},
-    {"macroSwitch2Long"},
-    {"macroSwitch3Short"},
-    {"macroSwitch3Long"},
-};
-
-#define PHYSICAL_HOTKEY_DESC_WIDTH  30
-
-// TODO: DATA-Flash table to translate the physicalHotKey number (i.e., enum rotary
-// encoder dial or switch, MACRO SW 1, 2 and 3, etc) to a mapped usbhid_xxx handler.
-// The hotKeyMap would be saved in DATA-Flash and modifable.
-
-typedef struct {
-    physicalHotKey_e hotKey;
-    uint8_t hotKeyHandlerIndex;     
-} hotKeyMap_s;
-
-static const hotKeyMap_s hotKeyMap[] = {
-    {rotaryDialClockwise,                       0},
-    {rotaryDialCounterClockwise,                1},
-    {rotaryDialSwitchShort,                     5},
-    {rotaryDialSwitchLong,                      6},
-    {macroSwitch1Short,                         9},
-    {macroSwitch1Long,                          9},
-    {macroSwitch2Short,                         9},
-    {macroSwitch2Long,                          9},
-    {macroSwitch3Short,                         9},
-    {macroSwitch3Long,                          9}         
-};
-
-typedef struct {
-    uint8_t handlerIndex;
-    char *handlerText;
-    char *hotkeyLabel;
-    uint8_t xPositionLabel;
-    uint8_t yPositionLabel;
-    void (*commandHandler)(void);
-} hotKeyHandler_s;
-
-static const hotKeyHandler_s hotKeyHandlers[] = {
-    {0x00,  "usbhid_mouseWheelRotateUp",        NULL,       0, 0, usbhid_mouseWheelRotateUp},
-    {0x01,  "usbhid_mouseWheelRotateDown",      NULL,       0, 0, usbhid_mouseWheelRotateDown},
-    {0x02,  "usbhid_consumerMediaMute",         NULL,       0, 0, usbhid_consumerMediaMute},
-    {0x03,  "usbhid_keyboardLockWorkstation",   NULL,       0, 0, usbhid_keyboardLockWorkstation},
-    {0x04,  "usbhid_consumerMediaBrowser",      NULL,       0, 0, usbhid_consumerMediaBrowser},
-    {0x05,  "usbhid_consumerMediaEditor",       NULL,       0, 0, usbhid_consumerMediaEditor},
-    {0x06,  "usbhid_consumerMediaCalculator",   NULL,       0, 0, usbhid_consumerMediaCalculator},
-    {0x07,  "usbhib_nullHandler",               "<<NOP>>",  4, 2, usbhib_nullHandler},
-    {0x08,  "usbhib_nullHandler",               "<<NOP>>",  0, 3, usbhib_nullHandler},
-    {0x09,  "usbhib_nullHandler",               "<<NOP>>",  8, 3, usbhib_nullHandler},
-};
-
-#define HOTKEY_HANDLER_DESC_WIDTH   35
-#define HOTKEY_HANDLER_LABEL_WIDTH  7
-
-void main_displayHotKeyHandlers(void) {
-
-    uint8_t mappedHotKeyHandlerIndex = 0;
-
-    serial_printString("\nHotkey Handlers ----------------------------------------------------------------\n");
-
-    // Itterate through all of the hotkeys handlers
-    for (uint8_t i = 0; i < NUMBER_OF_HOTKEY_HANDLERS; i++) {
-        serial_printHexByte(i);
-        serial_printString(":\t");
-
-        if (i != hotKeyHandlers[i].handlerIndex) {
-            serial_printString("Mapping ERROR detected");
-        } else {        
-            serial_printHexByte(hotKeyHandlers[i].handlerIndex);
-            serial_printString(":\t");
-            serial_printStringPadded(hotKeyHandlers[i].handlerText, HOTKEY_HANDLER_DESC_WIDTH);
-            serial_printString(": ");
-            serial_printStringPadded(hotKeyHandlers[i].hotkeyLabel, HOTKEY_HANDLER_LABEL_WIDTH);
-            serial_printString(" : ");
-            serial_printHexByte(hotKeyHandlers[i].xPositionLabel);
-            serial_printCharacter(' ');
-            serial_printHexByte(hotKeyHandlers[i].yPositionLabel);
-        }
-        
-        serial_printCharacter('\n');
-    }
-}
-
-void main_displayHotKeyMapping(void) {
-
-    uint8_t mappedHotKeyHandlerIndex = 0;
-
-    serial_printString("\nHotkey Mapping -----------------------------------------------------------------\n");
-
-    // Itterate through all of the physical hotkeys
-    for (uint8_t i = 0; i < NUMBER_OF_PHYSICAL_HOTKEYS; i++) {
-        serial_printHexByte(i);
-        serial_printString(":\t");
-
-        if (i != (uint8_t)hotKeyMap[i].hotKey) {
-            serial_printString("Mapping ERROR detected");
-        } else {
-            mappedHotKeyHandlerIndex = hotKeyMap[i].hotKeyHandlerIndex;
-            serial_printStringPadded(physicalHotKeyDescriptions[i], PHYSICAL_HOTKEY_DESC_WIDTH);
-            serial_printString(" --> ");
-
-            if (NUMBER_OF_HOTKEY_HANDLERS > mappedHotKeyHandlerIndex) {
-                serial_printString(hotKeyHandlers[mappedHotKeyHandlerIndex].handlerText);
-            } 
-        }
-
-        serial_printCharacter('\n');
-    }
-}
-
-static void main_triggerHotKeyHandler(physicalHotKey_e physicalHotKey) {
-
-    uint8_t foundHotKeyHandlerIndex = 0;
-    
-    // TODO: DATA-Flash table to translate the physicalHotKey number (i.e., enum rotary
-    // encoder dial or switch, MACRO SW 1, 2 and 3, etc) to a mapped usbhid_xxx handler.
-    // The hotKeyMap would be saved in DATA-Flash and modifable.
-   
-    for (uint8_t i = 0; i < NUMBER_OF_PHYSICAL_HOTKEYS; i++) {
-        if (physicalHotKey == hotKeyMap[i].hotKey) {
-            foundHotKeyHandlerIndex = hotKeyMap[i].hotKeyHandlerIndex;
-
-            // Quick sanity check to ensure hotKeyHandlerIndex in the mapping structure
-            // actually matches handlerIndex in our support hotkey handlers.
-            if (foundHotKeyHandlerIndex != hotKeyHandlers[foundHotKeyHandlerIndex].handlerIndex) {
-                break;
-            }
-
-            if (hotKeyHandlers[foundHotKeyHandlerIndex].commandHandler != NULL) {
-                hotKeyHandlers[foundHotKeyHandlerIndex].commandHandler();
-            }
-            break;
-        }    
-    }
-}
 
 static void main_epHandler(uint8_t length, __xdata uint8_t *report) __reentrant {
     
@@ -254,8 +94,9 @@ void main(void) {
     usbhid_initialise();
     usbhid_attachEPOutHandler(main_epHandler);
 
-    // Setup NVM (Data flash) handler
+    // Setup NVM (Data flash) handler and hotkey handler
     nvm_initialise();
+    hotkeys_initialise();
 
     // Enable global interrupts
     system_enableGlobalInterupts();
@@ -276,8 +117,11 @@ void main(void) {
     menu_initialise();
 #endif // CONSOLE_MENU_ENABLED
 
-    main_displayHotKeyHandlers();
-    main_displayHotKeyMapping();
+#if defined(CONSOLE_DEBUG_ENABLED) || defined (CONSOLE_MENU_ENABLED)
+    hotkeys_displayPhysicalHotKeys();
+    hotkeys_displayHotKeyHandlers();
+    hotkeys_displayHotKeyMapping();
+#endif // CONSOLE_DEBUG_ENABLED or CONSOLE_MENU_ENABLED
     
     // Display welcome message and basic HMI elements
     ssd1306_drawBmp(96, 0, 32, 32, bmpImageList[0]);
@@ -285,10 +129,10 @@ void main(void) {
     ssd1306_printString(FW_SLASH_1);
     ssd1306_setCursor(0, 1);
     ssd1306_printString(FW_SLASH_2);
-    for (uint8_t i = 0; i < NUMBER_OF_HOTKEY_HANDLERS; i++) {
-        if (hotKeyHandlers[i].hotkeyLabel != NULL) {
-            ssd1306_setCursor(hotKeyHandlers[i].xPositionLabel, hotKeyHandlers[i].yPositionLabel);
-            ssd1306_printString(hotKeyHandlers[i].hotkeyLabel);
+    for (uint8_t i = 0; i < NUMBER_OF_PHYSICAL_HOTKEYS; i++) {
+        if (physicalHotKeys[i].physicalLabel != NULL) {
+            ssd1306_setCursor(physicalHotKeys[i].xPositionLabel, physicalHotKeys[i].yPositionLabel);
+            ssd1306_printString(physicalHotKeys[i].physicalLabel);
         }
     } 
 
@@ -335,7 +179,7 @@ void main(void) {
         if (currentRotaryDirection != noRotation) {
             if (currentRotaryDirection == clockwiseRotation) {
                 currentWS2812Colour += 16;
-                main_triggerHotKeyHandler(rotaryDialClockwise);
+                hotkeys_triggerHotKeyHandler(rotaryDialClockwise);
 
                 if (currentImageIndex >= (sizeof(bmpImageList) / sizeof (bmpImageList[0])) - 1) {
                     currentImageIndex = 0;    
@@ -347,7 +191,7 @@ void main(void) {
 
             if (currentRotaryDirection == counterClockwiseRotation) {
                 currentWS2812Colour -= 16;
-                main_triggerHotKeyHandler(rotaryDialCounterClockwise);
+                hotkeys_triggerHotKeyHandler(rotaryDialCounterClockwise);
 
                 if (currentImageIndex > 0) {
                     currentImageIndex--;
@@ -365,35 +209,35 @@ void main(void) {
         }
 
         if (clickbtn_getButtonState(ROTARY_ENC_SW_INDEX)->clicks > 0) {
-            main_triggerHotKeyHandler(rotaryDialSwitchShort);
+            hotkeys_triggerHotKeyHandler(rotaryDialSwitchShort);
         }
         
         if (clickbtn_getButtonState(ROTARY_ENC_SW_INDEX)->clicks < 0) {
-            main_triggerHotKeyHandler(rotaryDialSwitchLong);
+            hotkeys_triggerHotKeyHandler(rotaryDialSwitchLong);
         }
 
         if (clickbtn_getButtonState(MACRO_1_SW_INDEX)->clicks > 0) {
-            main_triggerHotKeyHandler(macroSwitch1Short);
+            hotkeys_triggerHotKeyHandler(macroSwitch1Short);
         }
 
         if (clickbtn_getButtonState(MACRO_1_SW_INDEX)->clicks < 0) {
-            main_triggerHotKeyHandler(macroSwitch1Long);
+            hotkeys_triggerHotKeyHandler(macroSwitch1Long);
         }
 
         if (clickbtn_getButtonState(MACRO_2_SW_INDEX)->clicks > 0) {
-            main_triggerHotKeyHandler(macroSwitch2Short);
+            hotkeys_triggerHotKeyHandler(macroSwitch2Short);
         }
 
         if (clickbtn_getButtonState(MACRO_2_SW_INDEX)->clicks < 0) {
-            main_triggerHotKeyHandler(macroSwitch2Long);
+            hotkeys_triggerHotKeyHandler(macroSwitch2Long);
         }
 
         if (clickbtn_getButtonState(MACRO_2_SW_INDEX /*Change to MACRO_2_SW_INDEX in final PCB*/)->clicks > 0) {
-            main_triggerHotKeyHandler(macroSwitch3Short);
+            hotkeys_triggerHotKeyHandler(macroSwitch3Short);
         }
 
         if (clickbtn_getButtonState(MACRO_2_SW_INDEX /*Change to MACRO_2_SW_INDEX in final PCB*/)->clicks < 0) {
-            main_triggerHotKeyHandler(macroSwitch3Long);
+            hotkeys_triggerHotKeyHandler(macroSwitch3Long);
         }
     }
 }

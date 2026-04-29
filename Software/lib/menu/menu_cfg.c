@@ -17,6 +17,7 @@
 #include "menu.h"
 #include "menu_cfg.h"
 #include "menu_helper.h"
+#include "hotkeys.h"
 
 #define NUMBER_OF_MENU_ENTERIES     (sizeof(menuEntries) / sizeof(menuEntry_s))
 
@@ -25,6 +26,7 @@ const menuEntry_s menuEntries[] = {
     {"d", "Dump ROM memory",            menu_dumpROMMemory},
     {"x", "Dump RAM memory",            menu_dumpRAMMemory},
     {"s", "Rotary step size",           menu_rotaryStepSize},
+    {"m", "Modify Hotkey map",          menu_modifyHotKeyMap},
     {"r", "Reset",                      menu_coldReboot}
 };
 
@@ -98,7 +100,6 @@ void menu_dumpRAMMemory(char *argument) {
     baseAddress += 32;
 }
 
-
 void menu_rotaryStepSize(char *argument) {
     
     static uint16_t rotaryStepSize = 0;
@@ -113,13 +114,48 @@ void menu_rotaryStepSize(char *argument) {
     if (argument == NULL) {
         // Get parameter or option value
         serial_printHexWord(rotaryStepSize);
-        serial_printCharacter('\n');
     } else {
         // Set parameter or option value
-        rotaryStepSize = (uint16_t)menu_parseNumericalString(argument);
+        rotaryStepSize = menu_parseNumericalString(argument);
         serial_printHexWord(rotaryStepSize);
-        serial_printCharacter('\n');        
     }
+
+    serial_printCharacter('\n');        
+}
+
+void menu_modifyHotKeyMap(char *argument) {
+    
+    uint8_t hotkeyMapIndex = 0, hotKeyMapValue = 0;
+    
+    if ((argument != NULL) && (*argument == '?')) {
+        serial_printString("\nUsage: m|M <uint16_t> [MSB] Physical Hotkey [LSB] Hotkey Handler\n");
+        return;
+    }
+
+    serial_printCharacter('\n');        
+
+    if (argument == NULL) {
+        // Get parameter or option value
+        for (uint8_t i = 0; i < NUMBER_OF_PHYSICAL_HOTKEYS; i++) {
+            serial_printHexByte(hotKeyMap[i].physicalHotKey);
+            serial_printHexByte(hotKeyMap[i].hotKeyHandler);
+        }
+    } else {
+        // Set parameter or option value
+        hotkeyMapIndex = menu_parseNumericalString(argument) >> 8;
+        if (hotkeyMapIndex > NUMBER_OF_PHYSICAL_HOTKEYS) {
+            return;
+        }
+
+        hotKeyMapValue = menu_parseNumericalString(argument) & 0xFF;
+        if (hotKeyMapValue > NUMBER_OF_HOTKEY_HANDLERS) {
+            return;
+        }
+
+        hotKeyMap[hotkeyMapIndex].hotKeyHandler = (hotKeyHandlers_e)hotKeyMapValue;
+    }
+    
+    serial_printCharacter('\n');
 }
 
 void menu_coldReboot(char *argument) {

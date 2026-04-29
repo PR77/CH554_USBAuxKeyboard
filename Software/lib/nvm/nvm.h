@@ -18,14 +18,14 @@
 typedef enum {
     nvmOk = 0,
     nvmBusy,
-    nvmError
+    nvmGeneralError,
+    nvmCommandError,
+    nvmAddressError,
+    nvmSizeError
 } nvmStatus_e;
 
 void nvm_initialise(void);
-static void nvm_writeByte(uint8_t address, uint8_t data);
-static uint8_t nvm_readByte(uint8_t address);
-nvmStatus_e nvm_readBlock(uint8_t *data, uint8_t size);
-nvmStatus_e nvm_writeBlock(uint8_t *data, uint8_t size);
-
+nvmStatus_e nvm_readBlock(uint8_t *data, uint8_t startAddress, uint8_t size);
+nvmStatus_e nvm_writeBlock(const uint8_t *data, uint8_t startAddress, uint8_t size);
 
 #endif // __CH554_NVM_H__

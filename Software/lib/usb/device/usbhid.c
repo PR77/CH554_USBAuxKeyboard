@@ -207,7 +207,7 @@ void usbhid_keyboardLockWorkstation(void) {
     usbhid_ep1SendReport(usbhid_keyboardReport, USBHID_KEYBOARD_REPORT_SIZE);
 }
 
-void usbhib_nullHandler(void) {
+void usbhid_nullHandler(void) {
     
 }
 
