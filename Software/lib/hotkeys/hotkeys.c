@@ -16,6 +16,7 @@
 #include "device/usbhid.h"
 #include "hotkeys.h"
 #include "hotkeys_cfg.h"
+#include "nvm.h"
 
 #define PHYSICAL_HOTKEY_DESC_WIDTH  30
 #define PHYSICAL_HOTKEY_LABEL_WIDTH 7
@@ -48,7 +49,28 @@ const hotKeyHandler_s hotKeyHandlers[NUMBER_OF_HOTKEY_HANDLERS] = {
 
 void hotkeys_initialise(void) {
 
-    memcpy(hotKeyMap, hotKeyMapDefaults, sizeof(hotKeyMap_s) * NUMBER_OF_PHYSICAL_HOTKEYS);
+    if (nvm_readBlock((uint8_t *)hotKeyMap, sizeof(hotKeyMap_s) * NUMBER_OF_PHYSICAL_HOTKEYS) != nvmOk) {
+
+        serial_printString("\nhotKeyMapDefaults RESTORED\n");
+        memcpy(hotKeyMap, hotKeyMapDefaults, sizeof(hotKeyMap_s) * NUMBER_OF_PHYSICAL_HOTKEYS);
+    }
+}
+
+void hotkeys_updateHotKeyMapping(uint8_t hotKeyMapIndex, uint8_t hotKeyMapValue) {
+
+    if (hotKeyMapIndex > NUMBER_OF_PHYSICAL_HOTKEYS) {
+        return;
+    }
+
+    if (hotKeyMapValue > NUMBER_OF_HOTKEY_HANDLERS) {
+        return;
+    }
+
+    hotKeyMap[hotKeyMapIndex].hotKeyHandler = (hotKeyHandlers_e)hotKeyMapValue;
+
+    if (nvm_writeBlock((uint8_t *)hotKeyMap, sizeof(hotKeyMap_s) * NUMBER_OF_PHYSICAL_HOTKEYS) == nvmOk) {
+        serial_printString("\nhotKeyMap UPDATED\n");
+    }
 }
 
 void hotkeys_displayPhysicalHotKeys(void) {

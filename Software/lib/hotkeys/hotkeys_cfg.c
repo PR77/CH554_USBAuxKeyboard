@@ -12,7 +12,6 @@
 #include <string.h>
 #include <stdlib.h>
 #include "ch554.h"
-#include "hotkeys.h"
 #include "hotkeys_cfg.h"
 
 const hotKeyMap_s hotKeyMapDefaults[NUMBER_OF_PHYSICAL_HOTKEYS] = {
@@ -27,9 +26,5 @@ const hotKeyMap_s hotKeyMapDefaults[NUMBER_OF_PHYSICAL_HOTKEYS] = {
     {macroSwitch3Short,                         7},
     {macroSwitch3Long,                          7}         
 };
-
-// TODO: DATA-Flash table to translate the physicalHotKey number (i.e., enum rotary
-// encoder dial or switch, MACRO SW 1, 2 and 3, etc) to a mapped usbhid_xxx handler.
-// The hotKeyMap would be saved in DATA-Flash and modifable.
 
 __xdata hotKeyMap_s hotKeyMap[NUMBER_OF_PHYSICAL_HOTKEYS];

@@ -32,6 +32,7 @@ extern const physicalHotKeys_s physicalHotKeys[];
 extern const hotKeyHandler_s hotKeyHandlers[];
 
 void hotkeys_initialise(void);
+void hotkeys_updateHotKeyMapping(uint8_t hotKeyMapIndex, uint8_t hotKeyMapValue);
 void hotkeys_displayPhysicalHotKeys(void);
 void hotkeys_displayHotKeyHandlers(void);
 void hotkeys_displayHotKeyMapping(void);

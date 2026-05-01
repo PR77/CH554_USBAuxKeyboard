@@ -14,32 +14,29 @@
 #include "ch554.h"
 #include "nvm.h"
 
-// TODO - Need to implement level wearing. Can simply use a valid flag appended
-// to the data block.
-
 void nvm_initialise(void) {
 
+    // TODO: Need to add some simple wear leveling to the readBlock and writeBlock
+    // functions with a data valid flag DATA_FLASH_BLOCK_VALID.
 }
 
-nvmStatus_e nvm_readBlock(uint8_t *data, uint8_t startAddress, uint8_t size) {
+nvmStatus_e nvm_readBlock(uint8_t *data, uint8_t size) {
 
     nvmStatus_e result = nvmOk;
-    uint8_t address = 0;
 
     if (data == NULL) {
         return (nvmGeneralError);
     }
     
-    if ((startAddress + size) > DATA_FLASH_SIZE_MAX) {
+    if (size > DATA_FLASH_SIZE_MAX) {
         return (nvmSizeError);
     }
 
     // Data flash base address is DATA_FLASH_ADDR and reads must be on even addresses.
     ROM_ADDR_H = DATA_FLASH_ADDR >> 8;
-    address = startAddress << 1;
     
     for (uint8_t i = 0; i < size; i++) {
-        ROM_ADDR_L = address + (i << 1);
+        ROM_ADDR_L = (i << 1);
         ROM_CTRL = ROM_CMD_READ;
 
         if ((ROM_STATUS & bROM_CMD_ERR) == 0) {
@@ -53,12 +50,15 @@ nvmStatus_e nvm_readBlock(uint8_t *data, uint8_t startAddress, uint8_t size) {
     return (result);
 }
 
-nvmStatus_e nvm_writeBlock(const uint8_t *data, uint8_t startAddress, uint8_t size) {
+nvmStatus_e nvm_writeBlock(const uint8_t *data, uint8_t size) {
 
     nvmStatus_e result = nvmOk;
-    uint8_t address = 0;
     
-    if ((startAddress + size) > DATA_FLASH_SIZE_MAX) {
+    if (data == NULL) {
+        return (nvmGeneralError);
+    }
+
+    if (size > DATA_FLASH_SIZE_MAX) {
         return (nvmSizeError);
     }
 
@@ -70,10 +70,9 @@ nvmStatus_e nvm_writeBlock(const uint8_t *data, uint8_t startAddress, uint8_t si
     // Data flash base address is DATA_FLASH_ADDR and writes are 16 bits. Only the lower
     // 8 bites contains the data to write so all writes must be on even addresses.
     ROM_ADDR_H = DATA_FLASH_ADDR >> 8;
-    address = startAddress << 1;
 
     for (uint8_t i = 0; i < size; i++) {
-        ROM_ADDR_L = address + (i << 1);
+        ROM_ADDR_L = (i << 1);
         ROM_DATA_L = data[i];
 
         // Checking bROM_ADDR_OK can be done before triggering the ROM_CMD_WRITE request.

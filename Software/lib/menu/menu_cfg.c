@@ -125,7 +125,7 @@ void menu_rotaryStepSize(char *argument) {
 
 void menu_modifyHotKeyMap(char *argument) {
     
-    uint8_t hotkeyMapIndex = 0, hotKeyMapValue = 0;
+    uint8_t hotKeyMapIndex = 0, hotKeyMapValue = 0;
     
     if ((argument != NULL) && (*argument == '?')) {
         serial_printString("\nUsage: m|M <uint16_t> [MSB] Physical Hotkey [LSB] Hotkey Handler\n");
@@ -142,17 +142,9 @@ void menu_modifyHotKeyMap(char *argument) {
         }
     } else {
         // Set parameter or option value
-        hotkeyMapIndex = menu_parseNumericalString(argument) >> 8;
-        if (hotkeyMapIndex > NUMBER_OF_PHYSICAL_HOTKEYS) {
-            return;
-        }
-
+        hotKeyMapIndex = menu_parseNumericalString(argument) >> 8;
         hotKeyMapValue = menu_parseNumericalString(argument) & 0xFF;
-        if (hotKeyMapValue > NUMBER_OF_HOTKEY_HANDLERS) {
-            return;
-        }
-
-        hotKeyMap[hotkeyMapIndex].hotKeyHandler = (hotKeyHandlers_e)hotKeyMapValue;
+        hotkeys_updateHotKeyMapping(hotKeyMapIndex, hotKeyMapValue);
     }
     
     serial_printCharacter('\n');
