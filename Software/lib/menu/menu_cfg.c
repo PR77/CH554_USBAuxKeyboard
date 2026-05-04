@@ -8,6 +8,7 @@
 *******************************************************************************/
 
 #include <stdint.h>
+#include <stdbool.h>
 #include <compiler.h>
 #include <string.h>
 #include <stdlib.h>
@@ -25,7 +26,6 @@ const menuEntry_s menuEntries[] = {
     {"h", "Display command overview",   menu_printCommandOverview},
     {"d", "Dump ROM memory",            menu_dumpROMMemory},
     {"x", "Dump RAM memory",            menu_dumpRAMMemory},
-    {"s", "Rotary step size",           menu_rotaryStepSize},
     {"m", "Modify Hotkey map",          menu_modifyHotKeyMap},
     {"r", "Reset",                      menu_coldReboot}
 };
@@ -45,7 +45,7 @@ void menu_printCommandOverview(char *argument) {
     (void)argument;
     
     serial_printString(MENU_CLEAR_SCREEN_STRING);
-    serial_printString("Command Description ------------------------------------------------------------\n");
+    serial_printStringTitle("Command Description", SERIAL_CONSOLE_COLUMN_WIDTH, '-', true);
     
     for (uint8_t i = 0; i < NUMBER_OF_MENU_ENTERIES; i++) {
         serial_printString(menuEntries[i].commandName);
@@ -100,29 +100,6 @@ void menu_dumpRAMMemory(char *argument) {
     baseAddress += 32;
 }
 
-void menu_rotaryStepSize(char *argument) {
-    
-    static uint16_t rotaryStepSize = 0;
-    
-    if ((argument != NULL) && (*argument == '?')) {
-        serial_printString("\nUsage: s|S <uint16_t> step size\n");
-        return;
-    }
-
-    serial_printCharacter('\n');
-
-    if (argument == NULL) {
-        // Get parameter or option value
-        serial_printHexWord(rotaryStepSize);
-    } else {
-        // Set parameter or option value
-        rotaryStepSize = menu_parseNumericalString(argument);
-        serial_printHexWord(rotaryStepSize);
-    }
-
-    serial_printCharacter('\n');        
-}
-
 void menu_modifyHotKeyMap(char *argument) {
     
     uint8_t hotKeyMapIndex = 0, hotKeyMapValue = 0;
@@ -136,10 +113,7 @@ void menu_modifyHotKeyMap(char *argument) {
 
     if (argument == NULL) {
         // Get parameter or option value
-        for (uint8_t i = 0; i < NUMBER_OF_PHYSICAL_HOTKEYS; i++) {
-            serial_printHexByte(hotKeyMap[i].physicalHotKey);
-            serial_printHexByte(hotKeyMap[i].hotKeyHandler);
-        }
+        hotkeys_displayHotKeyMapping();
     } else {
         // Set parameter or option value
         hotKeyMapIndex = menu_parseNumericalString(argument) >> 8;

@@ -8,6 +8,7 @@
 *******************************************************************************/
 
 #include <stdint.h>
+#include <stdbool.h>
 #include <compiler.h>
 #include <string.h>
 #include <stdlib.h>
@@ -75,7 +76,7 @@ void hotkeys_updateHotKeyMapping(uint8_t hotKeyMapIndex, uint8_t hotKeyMapValue)
 
 void hotkeys_displayPhysicalHotKeys(void) {
    
-    serial_printString("\nPhysical Hotkeys / OLED Label / Position ---------------------------------------\n");
+    serial_printStringTitle("\nPhysical Hotkeys / OLED Label / Position", SERIAL_CONSOLE_COLUMN_WIDTH, '-', true);
 
     // Itterate through all of the hotkeys handlers
     for (uint8_t i = 0; i < NUMBER_OF_PHYSICAL_HOTKEYS; i++) {
@@ -102,7 +103,7 @@ void hotkeys_displayPhysicalHotKeys(void) {
 
 void hotkeys_displayHotKeyHandlers(void) {
 
-    serial_printString("\nHotkey Handlers ----------------------------------------------------------------\n");
+    serial_printStringTitle("\nHotkey Handlers", SERIAL_CONSOLE_COLUMN_WIDTH, '-', true);
 
     // Itterate through all of the hotkeys handlers
     for (uint8_t i = 0; i < NUMBER_OF_HOTKEY_HANDLERS; i++) {
@@ -125,7 +126,7 @@ void hotkeys_displayHotKeyMapping(void) {
 
     uint8_t mappedHotKeyHandlerIndex = 0;
 
-    serial_printString("\nHotkey Mapping -----------------------------------------------------------------\n");
+    serial_printStringTitle("\nHotkey Mapping", SERIAL_CONSOLE_COLUMN_WIDTH, '-', true);
 
     // Itterate through all of the physical hotkeys
     for (uint8_t i = 0; i < NUMBER_OF_PHYSICAL_HOTKEYS; i++) {
