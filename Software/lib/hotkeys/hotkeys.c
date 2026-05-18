@@ -53,20 +53,21 @@ void hotkeys_initialise(void) {
     if (nvm_readBlock((uint8_t *)hotKeyMap, sizeof(hotKeyMap_s) * NUMBER_OF_PHYSICAL_HOTKEYS) != nvmOk) {
 
         serial_printString("\nhotKeyMapDefaults RESTORED\n");
-        memcpy(hotKeyMap, hotKeyMapDefaults, sizeof(hotKeyMap_s) * NUMBER_OF_PHYSICAL_HOTKEYS);
+        memcpy(hotKeyMap, hotKeyMapDefaults, 20);//sizeof(hotKeyMap_s) * NUMBER_OF_PHYSICAL_HOTKEYS);
     }
 }
 
 void hotkeys_updateHotKeyMapping(uint8_t hotKeyMapIndex, uint8_t hotKeyMapValue) {
 
-    if (hotKeyMapIndex > NUMBER_OF_PHYSICAL_HOTKEYS) {
+    if (hotKeyMapIndex >= NUMBER_OF_PHYSICAL_HOTKEYS) {
         return;
     }
 
-    if (hotKeyMapValue > NUMBER_OF_HOTKEY_HANDLERS) {
+    if (hotKeyMapValue >= NUMBER_OF_HOTKEY_HANDLERS) {
         return;
     }
 
+    hotKeyMap[hotKeyMapIndex].physicalHotKey = (physicalHotKey_e)hotKeyMapIndex;
     hotKeyMap[hotKeyMapIndex].hotKeyHandler = (hotKeyHandlers_e)hotKeyMapValue;
 
     if (nvm_writeBlock((uint8_t *)hotKeyMap, sizeof(hotKeyMap_s) * NUMBER_OF_PHYSICAL_HOTKEYS) == nvmOk) {

@@ -22,13 +22,17 @@
 #include "rotary.h"
 #include "clickbtn.h"
 #include "device/usbhid.h"
-#include "main_gfx.h"
 #include "menu.h"
 #include "nvm.h"
 #include "hotkeys.h"
 
+#undef SSD1306_GFX_ENABLED
 #undef CONSOLE_DEBUG_ENABLED
 #define CONSOLE_MENU_ENABLED
+
+#if defined(SSD1306_GFX_ENABLED)
+#include "main_gfx.h"
+#endif // SSD1306_GFX_ENABLED
 
 #if defined(CONSOLE_DEBUG_ENABLED) && defined(CONSOLE_MENU_ENABLED)
 #error Only CONSOLE_DEBUG_ENABLED or CONSOLE_MENU_ENABLED can be enabled. Please disable one of the configurations
@@ -39,14 +43,14 @@
 #define LOG(msg)                    {serial_printString(__FILE__); serial_printCharacter(' '); serial_printHexWord(__LINE__); serial_printCharacter(' '); serial_printString(msg); serial_printString("\n\r");}
 
 static void main_epHandler(uint8_t length, __xdata uint8_t *report) __reentrant {
-    
+
     // IMPORTANT: This function should _REALLY_ be treated like an ISR and it is essentially
     // called from usbhandler_USBInterrupt() which is the USB ISR handler. What I've done
     // here is _REALLY_ just for testing.
 
     if ((report[0] == USBHID_LED_CTRL_REPORT_ID) && (length == USBHID_LED_CTRL_REPORT_SIZE)) {
         uint8_t currentWS2812Colour = report[1];
-    
+
         for (uint8_t i = 0; i < WS2812_PIXEL_COUNT; i++) {
             ws2812_setPixelWheelColour(i, currentWS2812Colour + (i * (UINT8_MAX / (WS2812_PIXEL_COUNT - 1))));
             ws2812_setPixelBrightess(i, brightness25Percent);
@@ -58,7 +62,10 @@ static void main_epHandler(uint8_t length, __xdata uint8_t *report) __reentrant 
 void main(void) {
     __xdata rotaryDirection_e currentRotaryDirection = noRotation;
     __xdata uint32_t previousCountLEDFlash = 0;
-    __xdata uint8_t currentWS2812Colour = 0, currentImageIndex = 0;
+    __xdata uint8_t currentWS2812Colour = 0;
+#if defined(SSD1306_GFX_ENABLED)
+    __xdata uint8_t currentImageIndex = 0;
+#endif // SSD1306_GFX_ENABLED
 
     // Setup low level system and bootloader
     system_disableGlobalInterupts();
@@ -94,12 +101,14 @@ void main(void) {
     usbhid_initialise();
     usbhid_attachEPOutHandler(main_epHandler);
 
-    // Setup NVM (Data flash) handler and hotkey handler
-    nvm_initialise();
-    hotkeys_initialise();
+    // Setup NVM (Data flash) handler
+    //nvm_initialise();
 
     // Enable global interrupts
     system_enableGlobalInterupts();
+
+    // Setup Hotkey handler
+    //hotkeys_initialise();
 
     // Setup WS2812 LED Driver and initialise all pixels (OFF)
     ws2812_initialise();
@@ -113,6 +122,10 @@ void main(void) {
     serial_printString(FW_DESC);
     serial_printString("\n\r");
 
+    // SO I CAN SEE THE SERIAL OUTPUT
+    nvm_initialise();
+    hotkeys_initialise();
+
 #if defined(CONSOLE_MENU_ENABLED)
     menu_initialise();
 #endif // CONSOLE_MENU_ENABLED
@@ -122,9 +135,12 @@ void main(void) {
     hotkeys_displayHotKeyHandlers();
     hotkeys_displayHotKeyMapping();
 #endif // CONSOLE_DEBUG_ENABLED or CONSOLE_MENU_ENABLED
-    
+
     // Display welcome message and basic HMI elements
+#if defined(SSD1306_GFX_ENABLED)
     ssd1306_drawBmp(96, 0, 32, 32, bmpImageList[0]);
+#endif // SSD1306_GFX_ENABLED
+
     ssd1306_setCursor(0, 0);
     ssd1306_printString(FW_SLASH_1);
     ssd1306_setCursor(0, 1);
@@ -134,16 +150,16 @@ void main(void) {
             ssd1306_setCursor(physicalHotKeys[i].xPositionLabel, physicalHotKeys[i].yPositionLabel);
             ssd1306_printString(physicalHotKeys[i].physicalLabel);
         }
-    } 
+    }
 
     // Cyclic loop application code starts here
     while (1) {
-        
+
 #if defined(CONSOLE_DEBUG_ENABLED)
         uint16_t characterToEcho = serial_getCharacter(0);
 
         if ((characterToEcho != RECEIVE_TIMEOUT) && (characterToEcho != RECEIVE_NO_DATA_AVAIL)) {
-            serial_printCharacter((char)characterToEcho);    
+            serial_printCharacter((char)characterToEcho);
         }
 #endif // CONSOLE_DEBUG_ENABLED
 
@@ -159,7 +175,7 @@ void main(void) {
         if (bootloader_checkBootloaderRequest()) {
             ws2812_initialise();
             ws2812_updatePixels();
-            usbhid_deinitialise();            
+            usbhid_deinitialise();
             ssd1306_clearScreen();
             ssd1306_setCursor(0, 0);
             ssd1306_printString("---- BOOT LOADER ----");
@@ -181,24 +197,28 @@ void main(void) {
                 currentWS2812Colour += 16;
                 hotkeys_triggerHotKeyHandler(rotaryDialClockwise);
 
+#if defined(SSD1306_GFX_ENABLED)
                 if (currentImageIndex >= (sizeof(bmpImageList) / sizeof (bmpImageList[0])) - 1) {
-                    currentImageIndex = 0;    
+                    currentImageIndex = 0;
                 } else {
-                    currentImageIndex++;    
+                    currentImageIndex++;
                 }
                 ssd1306_drawBmp(96, 0, 32, 32, bmpImageList[currentImageIndex]);
+#endif // SSD1306_GFX_ENABLED
             }
 
             if (currentRotaryDirection == counterClockwiseRotation) {
                 currentWS2812Colour -= 16;
                 hotkeys_triggerHotKeyHandler(rotaryDialCounterClockwise);
 
+#if defined(SSD1306_GFX_ENABLED)
                 if (currentImageIndex > 0) {
                     currentImageIndex--;
                 } else {
-                    currentImageIndex = (sizeof(bmpImageList) / sizeof (bmpImageList[0])) - 1;    
+                    currentImageIndex = (sizeof(bmpImageList) / sizeof (bmpImageList[0])) - 1;
                 }
                 ssd1306_drawBmp(96, 0, 32, 32, bmpImageList[currentImageIndex]);
+#endif // SSD1306_GFX_ENABLED
             }
 
             for (uint8_t i = 0; i < WS2812_PIXEL_COUNT; i++) {
@@ -211,7 +231,7 @@ void main(void) {
         if (clickbtn_getButtonState(ROTARY_ENC_SW_INDEX)->clicks > 0) {
             hotkeys_triggerHotKeyHandler(rotaryDialSwitchShort);
         }
-        
+
         if (clickbtn_getButtonState(ROTARY_ENC_SW_INDEX)->clicks < 0) {
             hotkeys_triggerHotKeyHandler(rotaryDialSwitchLong);
         }

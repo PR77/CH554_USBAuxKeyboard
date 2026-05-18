@@ -24,6 +24,7 @@ void menu_printCommandOverview(char *argument);
 void menu_signalError(void);
 void menu_dumpROMMemory(char *argument);
 void menu_dumpRAMMemory(char *argument);
+void menu_dumpDataFlashMemory(char *argument);
 void menu_modifyHotKeyMap(char *argument);
 void menu_coldReboot(char *argument);
 

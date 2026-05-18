@@ -15,16 +15,16 @@
 #include "hotkeys_cfg.h"
 
 const hotKeyMap_s hotKeyMapDefaults[NUMBER_OF_PHYSICAL_HOTKEYS] = {
-    {rotaryDialClockwise,                       7},
-    {rotaryDialCounterClockwise,                7},
-    {rotaryDialSwitchShort,                     7},
-    {rotaryDialSwitchLong,                      7},
-    {macroSwitch1Short,                         7},
-    {macroSwitch1Long,                          7},
-    {macroSwitch2Short,                         7},
-    {macroSwitch2Long,                          7},
-    {macroSwitch3Short,                         7},
-    {macroSwitch3Long,                          7}         
+    {rotaryDialClockwise,           nullHandler},
+    {rotaryDialCounterClockwise,    nullHandler},
+    {rotaryDialSwitchShort,         nullHandler},
+    {rotaryDialSwitchLong,          nullHandler},
+    {macroSwitch1Short,             nullHandler},
+    {macroSwitch1Long,              nullHandler},
+    {macroSwitch2Short,             nullHandler},
+    {macroSwitch2Long,              nullHandler},
+    {macroSwitch3Short,             nullHandler},
+    {macroSwitch3Long,              nullHandler}         
 };
 
 __xdata hotKeyMap_s hotKeyMap[NUMBER_OF_PHYSICAL_HOTKEYS];

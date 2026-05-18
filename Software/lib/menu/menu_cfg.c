@@ -19,6 +19,7 @@
 #include "menu_cfg.h"
 #include "menu_helper.h"
 #include "hotkeys.h"
+#include "nvm.h"
 
 #define NUMBER_OF_MENU_ENTERIES     (sizeof(menuEntries) / sizeof(menuEntry_s))
 
@@ -26,6 +27,7 @@ const menuEntry_s menuEntries[] = {
     {"h", "Display command overview",   menu_printCommandOverview},
     {"d", "Dump ROM memory",            menu_dumpROMMemory},
     {"x", "Dump RAM memory",            menu_dumpRAMMemory},
+    {"n", "Dump NVM memory",            menu_dumpDataFlashMemory},
     {"m", "Modify Hotkey map",          menu_modifyHotKeyMap},
     {"r", "Reset",                      menu_coldReboot}
 };
@@ -98,6 +100,21 @@ void menu_dumpRAMMemory(char *argument) {
 
     menu_dumpHex((__xdata uint8_t *)baseAddress, (uint16_t)baseAddress, 32);
     baseAddress += 32;
+}
+
+void menu_dumpDataFlashMemory(char *argument) {
+
+    uint8_t *dataFlashMirror = NULL;
+    
+    if ((argument != NULL) && (*argument == '?')) {
+        serial_printString("\nUsage: n|N Display all 128 bytes of NVM memory block\n");
+        return;
+    }
+
+    serial_printCharacter('\n');
+
+    dataFlashMirror = nvm_readDataFlashIntoMirror();
+    menu_dumpHex(dataFlashMirror, (uint16_t)DATA_FLASH_ADDR, 128);
 }
 
 void menu_modifyHotKeyMap(char *argument) {
