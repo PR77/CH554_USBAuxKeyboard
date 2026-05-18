@@ -102,13 +102,13 @@ void main(void) {
     usbhid_attachEPOutHandler(main_epHandler);
 
     // Setup NVM (Data flash) handler
-    //nvm_initialise();
+    nvm_initialise();
 
     // Enable global interrupts
     system_enableGlobalInterupts();
 
     // Setup Hotkey handler
-    //hotkeys_initialise();
+    hotkeys_initialise();
 
     // Setup WS2812 LED Driver and initialise all pixels (OFF)
     ws2812_initialise();
@@ -121,10 +121,6 @@ void main(void) {
     serial_printCharacter(' ');
     serial_printString(FW_DESC);
     serial_printString("\n\r");
-
-    // SO I CAN SEE THE SERIAL OUTPUT
-    nvm_initialise();
-    hotkeys_initialise();
 
 #if defined(CONSOLE_MENU_ENABLED)
     menu_initialise();

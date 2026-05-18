@@ -14,10 +14,8 @@
 #include "ch554.h"
 #include "nvm.h"
 
-#include "serial.h"
-
 __xdata int8_t lastValidBlock, nextFreeBlock;
-__xdata uint8_t dataFlashMirror[128];
+__xdata uint8_t dataFlashMirror[DATA_FLASH_SIZE_MAX];
 
 // IMPORTANT: readBlock and writeBlock block size parameter defines the data only portion
 // size. 1 additional byte is appended to determine if a block is valid. This is part of
