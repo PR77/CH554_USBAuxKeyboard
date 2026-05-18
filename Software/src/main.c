@@ -248,11 +248,11 @@ void main(void) {
             hotkeys_triggerHotKeyHandler(macroSwitch2Long);
         }
 
-        if (clickbtn_getButtonState(MACRO_2_SW_INDEX /*Change to MACRO_2_SW_INDEX in final PCB*/)->clicks > 0) {
+        if (clickbtn_getButtonState(MACRO_2_SW_INDEX /*Change to MACRO_3_SW_INDEX in final PCB*/)->clicks > 0) {
             hotkeys_triggerHotKeyHandler(macroSwitch3Short);
         }
 
-        if (clickbtn_getButtonState(MACRO_2_SW_INDEX /*Change to MACRO_2_SW_INDEX in final PCB*/)->clicks < 0) {
+        if (clickbtn_getButtonState(MACRO_2_SW_INDEX /*Change to MACRO_3_SW_INDEX in final PCB*/)->clicks < 0) {
             hotkeys_triggerHotKeyHandler(macroSwitch3Long);
         }
     }
