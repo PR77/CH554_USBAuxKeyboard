@@ -25,8 +25,8 @@
 
 const menuEntry_s menuEntries[] = {
     {"h", "Display command overview",   menu_printCommandOverview},
-    {"d", "Dump ROM memory",            menu_dumpROMMemory},
-    {"x", "Dump RAM memory",            menu_dumpRAMMemory},
+    {"d", "Dump CODE memory",           menu_dumpCODEMemory},
+    {"x", "Dump XDATA memory",          menu_dumpXDATAMemory},
     {"n", "Dump NVM memory",            menu_dumpDataFlashMemory},
     {"m", "Modify Hotkey map",          menu_modifyHotKeyMap},
     {"r", "Reset",                      menu_coldReboot}
@@ -62,12 +62,12 @@ void menu_signalError(void) {
     serial_printCharacter('\a');
 }
 
-void menu_dumpROMMemory(char *argument) {
+void menu_dumpCODEMemory(char *argument) {
 
     static uint16_t baseAddress = 0;
     
     if ((argument != NULL) && (*argument == '?')) {
-        serial_printString("\nUsage: d|D <uint16_t> start address of 32 byte ROM memory block\n");
+        serial_printString("\nUsage: d|D <uint16_t> start address of 32 byte CODE block\n");
         return;
     }
 
@@ -82,12 +82,12 @@ void menu_dumpROMMemory(char *argument) {
     baseAddress += 32;
 }
 
-void menu_dumpRAMMemory(char *argument) {
+void menu_dumpXDATAMemory(char *argument) {
 
     static uint16_t baseAddress = 0;
     
     if ((argument != NULL) && (*argument == '?')) {
-        serial_printString("\nUsage: x|X <uint16_t> start address of 32 byte RAM memory block\n");
+        serial_printString("\nUsage: x|X <uint16_t> start address of 32 byte XDATA block\n");
         return;
     }
 
@@ -107,7 +107,7 @@ void menu_dumpDataFlashMemory(char *argument) {
     uint8_t *dataFlashMirror = NULL;
     
     if ((argument != NULL) && (*argument == '?')) {
-        serial_printString("\nUsage: n|N Display all 128 bytes of NVM memory block\n");
+        serial_printString("\nUsage: n|N Display all 128 bytes of NVM block\n");
         return;
     }
 
@@ -137,14 +137,12 @@ void menu_modifyHotKeyMap(char *argument) {
         hotKeyMapValue = menu_parseNumericalString(argument) & 0xFF;
         hotkeys_updateHotKeyMapping(hotKeyMapIndex, hotKeyMapValue);
     }
-    
-    serial_printCharacter('\n');
 }
 
 void menu_coldReboot(char *argument) {
 
     if ((argument != NULL) && (*argument == '?')) {
-        serial_printString("\nUsage: r|R Perform a cold reboot of device\n");
+        serial_printString("\nUsage: r|R Perform a cold reboot\n");
         return;
     }
 
