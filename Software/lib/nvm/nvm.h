@@ -28,7 +28,7 @@ typedef enum {
 } nvmStatus_e;
 
 void nvm_initialise(void);
-uint8_t * nvm_readDataFlashIntoMirror(void);
+__xdata uint8_t * nvm_readDataFlashIntoMirror(void);
 nvmStatus_e nvm_writeByte(uint8_t addressOffset, uint8_t data);
 nvmStatus_e nvm_readBlock(uint8_t *data, uint8_t size);
 nvmStatus_e nvm_writeBlock(const uint8_t *data, uint8_t size);

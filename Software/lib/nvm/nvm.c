@@ -27,7 +27,7 @@ void nvm_initialise(void) {
     lastValidBlock = 0;
 }
 
-uint8_t * nvm_readDataFlashIntoMirror(void) {
+__xdata uint8_t * nvm_readDataFlashIntoMirror(void) {
     
     ROM_ADDR_H = DATA_FLASH_ADDR >> 8;
     
@@ -53,11 +53,14 @@ nvmStatus_e nvm_writeByte(uint8_t addressOffset, uint8_t data) {
         ROM_CTRL = ROM_CMD_WRITE;
     } 
 
-    // Check ROM_STATUS afect writing has occurred - Core is stopped during writing.
+    // Check ROM_STATUS after writing has occurred - Core is stopped during writing.
+    // ... check for bROM_CMD_ERR
     if ((ROM_STATUS & bROM_CMD_ERR) == bROM_CMD_ERR) {
         return (nvmCommandError);
     } 
 
+    // Check ROM_STATUS after writing has occurred - Core is stopped during writing.
+    // ... check for bROM_ADDR_OK
     if ((ROM_STATUS & bROM_ADDR_OK) == 0) {
         return (nvmAddressError);
     }
@@ -117,10 +120,13 @@ nvmStatus_e nvm_writeBlock(const uint8_t *data, uint8_t size) {
     lastValidBlock = nvm_findLastValidBlock(size);
 
     if (lastValidBlock < 0) {
-        // If there was no free valid block found, then start from block 0 again.
+        // If there was no free valid block found, then start from block 0 again and
+        // lastValidBlock is the last possible block.
         nextFreeBlock = 0;
         lastValidBlock = ((DATA_FLASH_SIZE_MAX / (size + 1)) - 1);
     } else {
+        // Otherwise set nextFreeBlock to the next block in the chain based on the
+        // value of lastValidBlock.
         nextFreeBlock = lastValidBlock + 1;
 
         if (nextFreeBlock > ((DATA_FLASH_SIZE_MAX / (size + 1)) - 1)) {
@@ -137,6 +143,9 @@ nvmStatus_e nvm_writeBlock(const uint8_t *data, uint8_t size) {
     // 8 bites contains the data to write so all writes must be on even addresses.
     ROM_ADDR_H = DATA_FLASH_ADDR >> 8;
 
+    // Wrap the Data flash update in a do ... while loop to allow for easy clean-up where
+    // Data flash accesses do not return nvmOk. This avoids gotos and labels.
+    
     do {
         // Write data payload to the start of the next free block.
         for (uint8_t i = 0; i < size; i++) {
