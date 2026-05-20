@@ -139,7 +139,7 @@ void hotkeys_displayHotKeyMapping(void) {
         } else {
             mappedHotKeyHandlerIndex = hotKeyMap[i].hotKeyHandler;
             serial_printStringPadded(physicalHotKeys[i].physicalText, PHYSICAL_HOTKEY_DESC_WIDTH);
-            serial_printString(" --> ");
+            serial_printString("--> ");
 
             if (NUMBER_OF_HOTKEY_HANDLERS > mappedHotKeyHandlerIndex) {
                 serial_printString(hotKeyHandlers[mappedHotKeyHandlerIndex].handlerText);
@@ -154,10 +154,6 @@ void hotkeys_triggerHotKeyHandler(physicalHotKey_e physicalHotKey) {
 
     hotKeyHandlers_e foundHotKeyHandlerIndex = nullHandler;
     
-    // TODO: DATA-Flash table to translate the physicalHotKey number (i.e., enum rotary
-    // encoder dial or switch, MACRO SW 1, 2 and 3, etc) to a mapped usbhid_xxx handler.
-    // The hotKeyMap would be saved in DATA-Flash and modifable.
-   
     for (uint8_t i = 0; i < NUMBER_OF_PHYSICAL_HOTKEYS; i++) {
         if (physicalHotKey == hotKeyMap[i].physicalHotKey) {
             foundHotKeyHandlerIndex = hotKeyMap[i].hotKeyHandler;

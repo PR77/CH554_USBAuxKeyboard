@@ -24,12 +24,12 @@
 #define NUMBER_OF_MENU_ENTERIES     (sizeof(menuEntries) / sizeof(menuEntry_s))
 
 const menuEntry_s menuEntries[] = {
-    {"h", "Display command overview",   menu_printCommandOverview},
-    {"d", "Dump CODE memory",           menu_dumpCODEMemory},
-    {"x", "Dump XDATA memory",          menu_dumpXDATAMemory},
-    {"n", "Dump NVM memory",            menu_dumpDataFlashMemory},
-    {"m", "Modify Hotkey map",          menu_modifyHotKeyMap},
-    {"r", "Reset",                      menu_coldReboot}
+    {'h', "Display command overview",   menu_printCommandOverview},
+    {'d', "Dump CODE memory",           menu_dumpCODEMemory},
+    {'x', "Dump XDATA memory",          menu_dumpXDATAMemory},
+    {'n', "Dump NVM memory",            menu_dumpDataFlashMemory},
+    {'m', "Modify Hotkey map",          menu_modifyHotKeyMap},
+    {'r', "Reset",                      menu_coldReboot}
 };
 
 inline uint8_t menu_getNumberOfMenuEnteries(void) {
@@ -50,7 +50,7 @@ void menu_printCommandOverview(char *argument) {
     serial_printStringTitle("Command Description", SERIAL_CONSOLE_COLUMN_WIDTH, '-', true);
     
     for (uint8_t i = 0; i < NUMBER_OF_MENU_ENTERIES; i++) {
-        serial_printString(menuEntries[i].commandName);
+        serial_printCharacter(menuEntries[i].commandName);
         serial_printCharacter('\t');
         serial_printString(menuEntries[i].commandText);
         serial_printCharacter('\n');
@@ -107,7 +107,7 @@ void menu_dumpDataFlashMemory(char *argument) {
     uint8_t *dataFlashMirror = NULL;
     
     if ((argument != NULL) && (*argument == '?')) {
-        serial_printString("\nUsage: n|N Display all 128 bytes of NVM block\n");
+        serial_printString("\nUsage: n|N Display 128 byte NVM block\n");
         return;
     }
 

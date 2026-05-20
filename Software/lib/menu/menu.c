@@ -27,15 +27,27 @@ void menu_initialise(void) {
 
 void menu_processCommand(void) {
 
-    char *command = 0, *argument = 0;
+    char *command = commandBuffer, *argument = NULL;
 
-    command = strtok(commandBuffer, " ");
+    // Delimit command and argument. Only 1 space between command and argument
+    // is supported to keep this simple.
+    for (char *tempPtr = commandBuffer; *tempPtr; tempPtr++) {
+        if (*tempPtr == ' ') {
+            // Space found after command, so delimit command and substitute the space
+            // with NULL terminator.
+            *tempPtr = 0;
+            // Argument is the next string.
+            argument = tempPtr + 1;
+            break;
+        }
+    }
 
     if (command != NULL) {
-        argument = strtok(NULL, "");
-
         for (uint8_t i = 0; i < menu_getNumberOfMenuEnteries(); i++) {
-            if (strcmp(command, menuEntries[i].commandName) == 0) {
+            if ((command[0] | 0x20) == menuEntries[i].commandName) {
+                // Since commands are only 1 character, check the first character only.
+                // Additionally, OR the command character (ASCII) with 0x20 to allow for
+                // case to be ignored. Lowercase has a higher ASCII value (offset of 0x20).
                 if (menuEntries[i].commandHandler != NULL) {
                     menuEntries[i].commandHandler(argument);
                 }

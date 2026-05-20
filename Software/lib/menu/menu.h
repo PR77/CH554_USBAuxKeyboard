@@ -16,7 +16,7 @@
 #define MENU_COMMAND_BUFFER_SIZE        16
 
 typedef struct {
-    char *commandName;
+    char commandName;
     char *commandText;
     void (*commandHandler)(char *argument);
 } menuEntry_s;

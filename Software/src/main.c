@@ -26,7 +26,7 @@
 #include "nvm.h"
 #include "hotkeys.h"
 
-#undef SSD1306_GFX_ENABLED
+#define SSD1306_GFX_ENABLED
 #undef CONSOLE_DEBUG_ENABLED
 #define CONSOLE_MENU_ENABLED
 
