@@ -114,6 +114,7 @@ void main(void) {
     ws2812_initialise();
     ws2812_displayFullWheelColour(brightness25Percent);
 
+#if defined(CONSOLE_DEBUG_ENABLED) || defined (CONSOLE_MENU_ENABLED)
     serial_printString("\x1b[2J\x1b[H");
     serial_printString(FW_NAME);
     serial_printCharacter(' ');
@@ -121,6 +122,7 @@ void main(void) {
     serial_printCharacter(' ');
     serial_printString(FW_DESC);
     serial_printString("\n\r");
+#endif // CONSOLE_DEBUG_ENABLED or CONSOLE_MENU_ENABLED
 
 #if defined(CONSOLE_MENU_ENABLED)
     menu_initialise();
