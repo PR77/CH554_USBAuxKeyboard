@@ -155,7 +155,7 @@ void ws2812_updatePixels(void) {
         ws2812_sendByte(ws2812_pixelBuffer[i]);    
     }
 
-    system_enableGlobalInterupts();
+    system_restoreGlobalInterupts();
     system_mDelayuS(WS2812_T_RESET_US);
 }
 
