@@ -42,7 +42,7 @@ inline void serial_disableSerial1Interrupt(void);
 inline void serial_enableSerial1Interrupt(void);
 
 #if defined(SERIAL_1_ENABLE_TX_INTERRUPTS)
-void serial_sendByteSerial1Interrupt(uint8_t character);
+void serial_sendByteSerial1Interrupt(uint8_t character) __reentrant;
 #else
 void serial_sendByteSerial1Blocking(uint8_t character);
 #endif // SERIAL_1_ENABLE_TX_INTERRUPTS

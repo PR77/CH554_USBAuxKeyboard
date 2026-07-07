@@ -108,7 +108,7 @@ void system_mDelayuS(uint16_t n) {
 #if FREQ_SYS >= 22000000
         ++SAFE_MOD;
 #endif
-#if FREQ_SYS >= 24000000
+#if FREQ_SYS > 24000000
         ++SAFE_MOD;
 #endif
 #if FREQ_SYS >= 26000000

@@ -16,19 +16,22 @@
 
 #if defined(SERIAL_1_ENABLE_TX_INTERRUPTS)
 static volatile __xdata uint8_t serial_transmitBuffer[SERIAL_1_TX_BUFFER_SIZE];
-static volatile __xdata uint8_t serial_transmitWriteIndex;
-static volatile __xdata uint8_t serial_transmitReadIndex;
-static volatile __xdata uint8_t serial_transmitTriggerred;
+static volatile __data uint8_t serial_transmitWriteIndex;
+static volatile __data uint8_t serial_transmitReadIndex;
+static volatile __data uint8_t serial_transmitTriggerred;
+static volatile __data uint8_t serial_priorityBoostCount;
 #endif
 
 #if defined(SERIAL_1_ENABLE_RX_INTERRUPTS)
 static volatile __xdata uint8_t serial_receiveBuffer[SERIAL_1_RX_BUFFER_SIZE];
-static volatile __xdata uint8_t serial_receiveWriteIndex;
-static volatile __xdata uint8_t serial_receiveReadIndex;
+static volatile __data uint8_t serial_receiveWriteIndex;
+static volatile __data uint8_t serial_receiveReadIndex;
 #endif
 
+#pragma save
+#pragma nooverlay
 void serial_UART1Interrupt(void) __interrupt(INT_NO_UART1) {
-
+    
 	if (U1RI) {
 #if defined(SERIAL_1_ENABLE_RX_INTERRUPTS)
         volatile uint8_t nextWriteIndex = 0, receivedData = 0;
@@ -56,12 +59,13 @@ void serial_UART1Interrupt(void) __interrupt(INT_NO_UART1) {
 #if defined(SERIAL_1_ENABLE_TX_INTERRUPTS)
         // Check if transmit buffer is not empty
         if (serial_transmitWriteIndex != serial_transmitReadIndex) {
-
-            // Get one byte from buffer and write it
-            SBUF1 = serial_transmitBuffer[serial_transmitReadIndex];
-
-            // Calculate and store new buffer index
+            uint8_t characterToSend;
+            
+            // Get one byte from buffer and calculate and store new buffer index
+            characterToSend = serial_transmitBuffer[serial_transmitReadIndex];
             serial_transmitReadIndex = (serial_transmitReadIndex + 1) & SERIAL_1_TX_BUFFER_MASK;
+                        
+            SBUF1 = characterToSend;
         } else {
             // If there are no more bytes to be sent, then clear the Transmit Triggered
             // flag to ensure a transmit is (re-)triggered when another byte(s) is added
@@ -71,6 +75,7 @@ void serial_UART1Interrupt(void) __interrupt(INT_NO_UART1) {
 #endif
     }
 }
+#pragma restore
 
 void serial_initialiseSerial1(uint32_t baudRate, uint8_t alternativePins) {
     U1SM0 = 0;
@@ -87,6 +92,7 @@ void serial_initialiseSerial1(uint32_t baudRate, uint8_t alternativePins) {
     serial_transmitWriteIndex = 0;
     serial_transmitReadIndex = 0;
     serial_transmitTriggerred = 0;
+    serial_priorityBoostCount = 0;
 #endif
 
 #if defined(SERIAL_1_ENABLE_RX_INTERRUPTS)
@@ -185,14 +191,26 @@ uint16_t serial_getByteSerial1Blocking(uint32_t timeout) {
 #endif // ! SERIAL_1_ENABLE_RX_INTERRUPTS
 
 #if defined(SERIAL_1_ENABLE_TX_INTERRUPTS)
-void serial_sendByteSerial1Interrupt(uint8_t character) {
+void serial_sendByteSerial1Interrupt(uint8_t character) __reentrant {
 
-    volatile uint8_t nextWriteIndex = (serial_transmitWriteIndex + 1) & SERIAL_1_TX_BUFFER_MASK;;
+    volatile uint8_t nextWriteIndex = (serial_transmitWriteIndex + 1) & SERIAL_1_TX_BUFFER_MASK;
 
-    while (nextWriteIndex == serial_transmitReadIndex) {
-        // Wait for free space in buffer before pushing next character into it.
-        // When this occurs, then sendByte...() will be blocking.
-        ;
+    if (nextWriteIndex == serial_transmitReadIndex) {
+        // IP_UART1 is increased to ensure it does not get blocked and the while-loop
+        // ends up dead-locking the system.
+        serial_priorityBoostCount++;
+        IP_EX = IP_EX | (bIP_UART1);
+    
+        while (nextWriteIndex == serial_transmitReadIndex) {
+            // Wait for free space in buffer before pushing next character into it.
+            // When this occurs, then sendByte...() will be blocking.
+            ;
+        }
+
+        if (--serial_priorityBoostCount == 0) {
+            // Unblocked, UART1 priority moved back to normal.
+            IP_EX = IP_EX & ~(bIP_UART1);
+        }
     }
 
     serial_transmitBuffer[serial_transmitWriteIndex] = character;
@@ -204,7 +222,7 @@ void serial_sendByteSerial1Interrupt(uint8_t character) {
         U1TI = 1;
     }
 }
-#endif // SERIAL_1_ENABLE_TX_INTERRUPTS
+#endif // SERIAL_1_ENABLE_TX_INTERRUPTSh
 
 #if !defined(SERIAL_1_ENABLE_TX_INTERRUPTS)
 void serial_sendByteSerial1Blocking(uint8_t character) {

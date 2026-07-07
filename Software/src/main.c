@@ -140,9 +140,9 @@ void main(void) {
 #endif // SSD1306_GFX_ENABLED
 
     ssd1306_setCursor(0, 0);
-    ssd1306_printString(FW_SLASH_1);
+    ssd1306_printString(FW_SPLASH_1);
     ssd1306_setCursor(0, 1);
-    ssd1306_printString(FW_SLASH_2);
+    ssd1306_printString(FW_SPLASH_2);
     for (uint8_t i = 0; i < NUMBER_OF_PHYSICAL_HOTKEYS; i++) {
         if (physicalHotKeys[i].physicalLabel != NULL) {
             ssd1306_setCursor(physicalHotKeys[i].xPositionLabel, physicalHotKeys[i].yPositionLabel);

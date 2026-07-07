@@ -70,8 +70,8 @@ with open("include/firmware_info.h", "w") as f:
 #define FW_VERSION          "%s"
 #define FW_DESC             "%s"
 #define FW_MFG              "%s"
-#define FW_SLASH_1          "%s"
-#define FW_SLASH_2          "%s"
+#define FW_SPLASH_1         "%s"
+#define FW_SPLASH_2         "%s"
 #define FW_GIT              "%s"
 #define FW_BUILD_TIME       "%s"
 #define FW_BUILD_NUMBER     %d
