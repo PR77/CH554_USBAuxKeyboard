@@ -13,6 +13,7 @@ RADIUS        = 13        # circle radius
 THICKNESS     = 2         # circle line thickness
 NOTCH_LENGTH  = 5         # length of notch
 NOTCH_WIDTH   = 2         # angular width (pixels)
+SEGMENTS      = 10        # number of segments
 
 def empty_bitmap():
     return [[0 for _ in range(WIDTH)] for _ in range(HEIGHT)]
@@ -27,7 +28,7 @@ def draw_circle(img):
                 img[y][x] = 1
 
 def draw_notch(img, hour):
-    angle = -math.pi / 2 + hour * (2 * math.pi / 12)
+    angle = -math.pi / 2 + hour * (2 * math.pi / SEGMENTS)
     for r in range(RADIUS, RADIUS + NOTCH_LENGTH):
         for w in range(-NOTCH_WIDTH, NOTCH_WIDTH + 1):
             x = int(CENTER_X + (r * math.cos(angle)) - w * math.sin(angle))
@@ -55,16 +56,16 @@ def emit_c_array(name, data):
         start = page * WIDTH
         end   = start + WIDTH
 
-        for i in range(start, end, 12):
-            row = ", ".join(f"0x{b:02X}" for b in data[i:min(i+12, end)])
+        for i in range(start, end, SEGMENTS):
+            row = ", ".join(f"0x{b:02X}" for b in data[i:min(i+SEGMENTS, end)])
             print(f"    {row},")
 
     print("};\n")
 
-# ---- Generate all 12 positions ----
+# ---- Generate all SEGMENTS positions ----
 bitmap_names = []
 
-for hour in range(12):
+for hour in range(SEGMENTS):
     img = empty_bitmap()
     draw_circle(img)
     draw_notch(img, hour)
@@ -76,7 +77,7 @@ for hour in range(12):
     emit_c_array(name, data)
 
 # ---- Generate index array ----
-print(f"const __code uint8_t *bmpImageList[12] = {{")
+print(f"uint8_t __code * __code bmpImageList[SEGMENTS] = {{")
 for name in bitmap_names:
     print(f"    {name},")
 print("};")

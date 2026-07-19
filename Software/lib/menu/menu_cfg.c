@@ -13,7 +13,8 @@
 #include <string.h>
 #include <stdlib.h>
 #include "ch554.h"
-#include "serial.h"
+#include "firmware_info.h"
+#include "console.h"
 #include "system.h"
 #include "menu.h"
 #include "menu_cfg.h"
@@ -38,40 +39,39 @@ inline uint8_t menu_getNumberOfMenuEnteries(void) {
 
 void menu_printCommandPrompt(void) {
  
-    serial_printCharacter('\n');
-    serial_printCharacter(MENU_COMMAND_PROMPT_CHARACTER);
+    console_printCharacter('\n');
+    console_printCharacter(MENU_COMMAND_PROMPT_CHARACTER);
 }
 
 void menu_printCommandOverview(char *argument) {
 
     (void)argument;
     
-    serial_printString(MENU_CLEAR_SCREEN_STRING);
-    serial_printStringTitle("Command Description", SERIAL_CONSOLE_COLUMN_WIDTH, '-', true);
+    console_printString(MENU_CLEAR_SCREEN_STRING);
+    console_printStringTitle("Command Description", CONSOLE_COLUMN_WIDTH, '-', true);
     
     for (uint8_t i = 0; i < NUMBER_OF_MENU_ENTERIES; i++) {
-        serial_printCharacter(menuEntries[i].commandName);
-        serial_printCharacter('\t');
-        serial_printString(menuEntries[i].commandText);
-        serial_printCharacter('\n');
+        console_printCharacter(menuEntries[i].commandName);
+        console_printCharacter('\t');
+        console_printString(menuEntries[i].commandText);
+        console_printCharacter('\n');
     }
 }
 
 void menu_signalError(void) {
   
-    serial_printCharacter('\a');
+    console_printCharacter('\a');
 }
 
 void menu_dumpCODEMemory(char *argument) {
-
     static uint16_t baseAddress = 0;
     
     if ((argument != NULL) && (*argument == '?')) {
-        serial_printString("\nUsage: d|D <uint16_t> start address of 32 byte CODE block\n");
+        console_printString("\nUsage: d|D <uint16_t> start address of 32 byte CODE block\n");
         return;
     }
 
-    serial_printCharacter('\n');
+    console_printCharacter('\n');
 
     if (argument != NULL) {
         // Set parameter or option value         
@@ -83,15 +83,14 @@ void menu_dumpCODEMemory(char *argument) {
 }
 
 void menu_dumpXDATAMemory(char *argument) {
-
     static uint16_t baseAddress = 0;
     
     if ((argument != NULL) && (*argument == '?')) {
-        serial_printString("\nUsage: x|X <uint16_t> start address of 32 byte XDATA block\n");
+        console_printString("\nUsage: x|X <uint16_t> start address of 32 byte XDATA block\n");
         return;
     }
 
-    serial_printCharacter('\n');
+    console_printCharacter('\n');
 
     if (argument != NULL) {
         // Set parameter or option value         
@@ -103,15 +102,14 @@ void menu_dumpXDATAMemory(char *argument) {
 }
 
 void menu_dumpDataFlashMemory(char *argument) {
-
     uint8_t *dataFlashMirror = NULL;
     
     if ((argument != NULL) && (*argument == '?')) {
-        serial_printString("\nUsage: n|N Display 128 byte NVM block\n");
+        console_printString("\nUsage: n|N Display 128 byte NVM block\n");
         return;
     }
 
-    serial_printCharacter('\n');
+    console_printCharacter('\n');
 
     dataFlashMirror = nvm_readDataFlashIntoMirror();
     menu_dumpHex(dataFlashMirror, (uint16_t)DATA_FLASH_ADDR, 128);
@@ -122,11 +120,11 @@ void menu_modifyHotKeyMap(char *argument) {
     uint8_t hotKeyMapIndex = 0, hotKeyMapValue = 0;
     
     if ((argument != NULL) && (*argument == '?')) {
-        serial_printString("\nUsage: m|M <uint16_t> [MSB] Physical Hotkey [LSB] Hotkey Handler\n");
+        console_printString("\nUsage: m|M <uint16_t> [MSB] Physical Hotkey [LSB] Hotkey Handler\n");
         return;
     }
 
-    serial_printCharacter('\n');        
+    console_printCharacter('\n');        
 
     if (argument == NULL) {
         // Get parameter or option value
@@ -142,7 +140,7 @@ void menu_modifyHotKeyMap(char *argument) {
 void menu_coldReboot(char *argument) {
 
     if ((argument != NULL) && (*argument == '?')) {
-        serial_printString("\nUsage: r|R Perform a cold reboot\n");
+        console_printString("\nUsage: r|R Perform a cold reboot\n");
         return;
     }
 

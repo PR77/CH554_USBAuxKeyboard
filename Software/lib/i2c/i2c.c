@@ -14,6 +14,8 @@
 
 #include <stdint.h>
 #include <compiler.h>
+#include <string.h>
+#include <stdlib.h>
 #include "ch554.h"
 #include "i2c.h"
 #include "i2c_cfg.h"

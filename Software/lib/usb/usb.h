@@ -55,6 +55,10 @@
 #define HID_SET_PROTOCOL        0x0B
 #endif
 
+#define SET_LINE_CODING         0x20  // Configures DTE rate, stop-bits, parity, and number-of-character
+#define GET_LINE_CODING         0x21  // This request allows the host to find out the currently configured line coding.
+#define SET_CONTROL_LINE_STATE  0x22  // This request generates RS-232/V.24 style control signals.
+
 // Bit define for USB request type
 #ifndef USB_REQ_TYP_MASK
 #define USB_REQ_TYP_IN          0x80  // control IN, device to host
@@ -295,6 +299,51 @@ typedef struct _USB_HID_DESCR {
     uint16_t wDescriptorLength;
 } USB_HID_DESCR, *PUSB_HID_DESCR;
 typedef USB_HID_DESCR __xdata *PXUSB_HID_DESCR;
+
+// ===================================================================================
+// CDC Line Coding
+// ===================================================================================
+typedef struct _USB_CDC_LineCodingDesc {
+    uint32_t baudrate;                // baud rate
+    uint8_t  stopbits;                // number of stopbits (0:1bit,1:1.5bits,2:2bits)
+    uint8_t  parity;                  // parity (0:none,1:odd,2:even,3:mark,4:space)
+    uint8_t  databits;                // number of data bits (5,6,7,8 or 16)
+} USB_CDC_LineCodingDesc, *PUSB_CDC_LineCodingDesc;
+typedef USB_CDC_LineCodingDesc __xdata *PXUSB_CDC_LineCodingDesc;
+
+typedef struct _USB_CDC_HeaderFuncDesc {
+    uint8_t  bFunctionLength;
+    uint8_t  bDescriptorType;
+    uint8_t  bDescriptorSubType;
+    uint16_t bcdCDC;
+} USB_CDC_HeaderFuncDesc, *PUSB_CDC_HeaderFuncDesc;
+typedef USB_CDC_HeaderFuncDesc __xdata *PXUSB_CDC_HeaderFuncDesc;
+
+typedef struct _USB_CDC_CallManagementDesc {
+    uint8_t bFunctionLength;
+    uint8_t bDescriptorType;
+    uint8_t bDescriptorSubType;
+    uint8_t bmCapabilities;
+    uint8_t bDataInterface;
+} USB_CDC_CallManagementDesc, *PUSB_CDC_CallManagementDesc;
+typedef USB_CDC_CallManagementDesc __xdata *PXUSB_CDC_CallManagementDesc;
+
+typedef struct _USB_CDC_ACMDesc_TYPE {
+    uint8_t bFunctionLength;
+    uint8_t bDescriptorType;
+    uint8_t bDescriptorSubType;
+    uint8_t bmCapabilities;
+} USB_CDC_ACMDesc, *PUSB_CDC_ACMDesc;
+typedef USB_CDC_ACMDesc __xdata *PXUSB_CDC_ACMDesc;
+
+typedef struct _USB_CDC_UnionDesc {
+    uint8_t bFunctionLength;
+    uint8_t bDescriptorType;
+    uint8_t bDescriptorSubType;
+    uint8_t bMasterInterface;
+    uint8_t bSlaveInterface;
+} USB_CDC_UnionDesc, *PUSB_CDC_UnionDesc;
+typedef USB_CDC_UnionDesc __xdata *PXUSB_CDC_UnionDesc;
 
 typedef struct _UDISK_BOC_CBW {             // command of BulkOnly USB-FlashDisk
     uint8_t mCBW_Sig0;

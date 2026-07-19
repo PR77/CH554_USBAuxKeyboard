@@ -16,9 +16,11 @@
 #define __CH554_I2C_H__
 
 #include <stdint.h>
+#include <compiler.h>
+#include <string.h>
+#include <stdlib.h>
+#include <stdbool.h>
 #include "ch554.h"
-
-typedef __bit bool;
 
 void i2c_initialise(void);
 void i2c_startCommunication(uint8_t address);

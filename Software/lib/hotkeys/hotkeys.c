@@ -13,7 +13,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "ch554.h"
-#include "serial.h"
+#include "console.h"
 #include "device/usbhid.h"
 #include "hotkeys.h"
 #include "hotkeys_cfg.h"
@@ -52,7 +52,7 @@ void hotkeys_initialise(void) {
 
     if (nvm_readBlock((uint8_t *)hotKeyMap, sizeof(hotKeyMap_s) * NUMBER_OF_PHYSICAL_HOTKEYS) != nvmOk) {
 
-        serial_printString("\nhotKeyMapDefaults RESTORED\n");
+        console_printString("\nhotKeyMapDefaults RESTORED\n");
         memcpy(hotKeyMap, hotKeyMapDefaults, 20);//sizeof(hotKeyMap_s) * NUMBER_OF_PHYSICAL_HOTKEYS);
     }
 }
@@ -71,55 +71,55 @@ void hotkeys_updateHotKeyMapping(uint8_t hotKeyMapIndex, uint8_t hotKeyMapValue)
     hotKeyMap[hotKeyMapIndex].hotKeyHandler = (hotKeyHandlers_e)hotKeyMapValue;
 
     if (nvm_writeBlock((uint8_t *)hotKeyMap, sizeof(hotKeyMap_s) * NUMBER_OF_PHYSICAL_HOTKEYS) == nvmOk) {
-        serial_printString("\nhotKeyMap UPDATED\n");
+        console_printString("\nhotKeyMap UPDATED\n");
     }
 }
 
 void hotkeys_displayPhysicalHotKeys(void) {
    
-    serial_printStringTitle("\nPhysical Hotkeys / OLED Label / Position", SERIAL_CONSOLE_COLUMN_WIDTH, '-', true);
+    console_printStringTitle("\nPhysical Hotkeys / OLED Label / Position", CONSOLE_COLUMN_WIDTH, '-', true);
 
     // Itterate through all of the hotkeys handlers
     for (uint8_t i = 0; i < NUMBER_OF_PHYSICAL_HOTKEYS; i++) {
-        serial_printHexByte(i);
-        serial_printString(":\t");
+        console_printHexByte(i);
+        console_printString(":\t");
 
         if (i != (uint8_t)physicalHotKeys[i].physicalIndex) {
-            serial_printString("Mapping ERROR detected");
+            console_printString("Mapping ERROR detected");
         } else {        
-            serial_printHexByte(physicalHotKeys[i].physicalIndex);
-            serial_printString(":\t");
-            serial_printStringPadded(physicalHotKeys[i].physicalText, PHYSICAL_HOTKEY_DESC_WIDTH);
-            serial_printString(": ");
-            serial_printStringPadded(physicalHotKeys[i].physicalLabel, PHYSICAL_HOTKEY_LABEL_WIDTH);
-            serial_printString(" : ");
-            serial_printHexByte(physicalHotKeys[i].xPositionLabel);
-            serial_printCharacter(' ');
-            serial_printHexByte(physicalHotKeys[i].yPositionLabel);
+            console_printHexByte(physicalHotKeys[i].physicalIndex);
+            console_printString(":\t");
+            console_printStringPadded(physicalHotKeys[i].physicalText, PHYSICAL_HOTKEY_DESC_WIDTH);
+            console_printString(": ");
+            console_printStringPadded(physicalHotKeys[i].physicalLabel, PHYSICAL_HOTKEY_LABEL_WIDTH);
+            console_printString(" : ");
+            console_printHexByte(physicalHotKeys[i].xPositionLabel);
+            console_printCharacter(' ');
+            console_printHexByte(physicalHotKeys[i].yPositionLabel);
         }
         
-        serial_printCharacter('\n');
+        console_printCharacter('\n');
     }
 }
 
 void hotkeys_displayHotKeyHandlers(void) {
 
-    serial_printStringTitle("\nHotkey Handlers", SERIAL_CONSOLE_COLUMN_WIDTH, '-', true);
+    console_printStringTitle("\nHotkey Handlers", CONSOLE_COLUMN_WIDTH, '-', true);
 
     // Itterate through all of the hotkeys handlers
     for (uint8_t i = 0; i < NUMBER_OF_HOTKEY_HANDLERS; i++) {
-        serial_printHexByte(i);
-        serial_printString(":\t");
+        console_printHexByte(i);
+        console_printString(":\t");
 
         if (i != (uint8_t)hotKeyHandlers[i].handlerIndex) {
-            serial_printString("Mapping ERROR detected");
+            console_printString("Mapping ERROR detected");
         } else {        
-            serial_printHexByte(hotKeyHandlers[i].handlerIndex);
-            serial_printString(":\t");
-            serial_printStringPadded(hotKeyHandlers[i].handlerText, HOTKEY_HANDLER_DESC_WIDTH);
+            console_printHexByte(hotKeyHandlers[i].handlerIndex);
+            console_printString(":\t");
+            console_printStringPadded(hotKeyHandlers[i].handlerText, HOTKEY_HANDLER_DESC_WIDTH);
         }
         
-        serial_printCharacter('\n');
+        console_printCharacter('\n');
     }
 }
 
@@ -127,26 +127,26 @@ void hotkeys_displayHotKeyMapping(void) {
 
     uint8_t mappedHotKeyHandlerIndex = 0;
 
-    serial_printStringTitle("\nHotkey Mapping", SERIAL_CONSOLE_COLUMN_WIDTH, '-', true);
+    console_printStringTitle("\nHotkey Mapping", CONSOLE_COLUMN_WIDTH, '-', true);
 
     // Itterate through all of the physical hotkeys
     for (uint8_t i = 0; i < NUMBER_OF_PHYSICAL_HOTKEYS; i++) {
-        serial_printHexByte(i);
-        serial_printString(":\t");
+        console_printHexByte(i);
+        console_printString(":\t");
 
         if (i != (uint8_t)hotKeyMap[i].physicalHotKey) {
-            serial_printString("Mapping ERROR detected");
+            console_printString("Mapping ERROR detected");
         } else {
             mappedHotKeyHandlerIndex = hotKeyMap[i].hotKeyHandler;
-            serial_printStringPadded(physicalHotKeys[i].physicalText, PHYSICAL_HOTKEY_DESC_WIDTH);
-            serial_printString("--> ");
+            console_printStringPadded(physicalHotKeys[i].physicalText, PHYSICAL_HOTKEY_DESC_WIDTH);
+            console_printString("--> ");
 
             if (NUMBER_OF_HOTKEY_HANDLERS > mappedHotKeyHandlerIndex) {
-                serial_printString(hotKeyHandlers[mappedHotKeyHandlerIndex].handlerText);
+                console_printString(hotKeyHandlers[mappedHotKeyHandlerIndex].handlerText);
             } 
         }
 
-        serial_printCharacter('\n');
+        console_printCharacter('\n');
     }
 }
 

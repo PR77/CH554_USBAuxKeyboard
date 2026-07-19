@@ -11,6 +11,7 @@
 #include <compiler.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include "ch554.h"
 #include "system.h"
 #include "usb.h"

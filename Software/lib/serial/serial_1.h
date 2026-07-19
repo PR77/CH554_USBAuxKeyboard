@@ -49,9 +49,9 @@ void serial_sendByteSerial1Blocking(uint8_t character);
 
 #if defined(SERIAL_1_ENABLE_RX_INTERRUPTS)
 uint16_t serial_isDataAvailableSerial1Interrupt(void);
-uint16_t serial_getByteSerial1Interrupt(uint32_t timeout);
+uint16_t serial_getByteSerial1Interrupt(uint8_t timeout);
 #else
-uint16_t serial_getByteSerial1Blocking(uint32_t timeout);
+uint16_t serial_getByteSerial1Blocking(uint8_t timeout);
 #endif // SERIAL_1_ENABLE_RX_INTERRUPTS
 
 #if defined(SERIAL_1_ENABLE_TX_INTERRUPTS)

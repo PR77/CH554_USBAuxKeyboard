@@ -12,7 +12,8 @@
 #include <string.h>
 #include <stdlib.h>
 #include "ch554.h"
-#include "serial.h"
+#include "firmware_info.h"
+#include "console.h"
 #include "menu_helper.h"
 
 uint16_t menu_parseNumericalString(char *s) {
@@ -23,6 +24,11 @@ uint16_t menu_parseNumericalString(char *s) {
 
     if (s == NULL) {
         return result;
+    }
+
+    // Skip leading whitespace
+    while (*s == ' ' || *s == '\t' || *s == '\r' || *s == '\n') {
+        s++;
     }
 
     // Detect hex prefix
@@ -61,23 +67,23 @@ void menu_dumpHex(const uint8_t *data, uint16_t startAddress, uint16_t length)
     while (offset < length) {
 
         // --- Print address ---
-        serial_printHexWord(startAddress + offset);
-        serial_printString(": ");
+        console_printHexWord(startAddress + offset);
+        console_printString(": ");
 
         // --- Print hex bytes ---
         uint8_t i;
         for (i = 0; i < 16; i++) {
             if (offset + i < length) {
-                serial_printHexByte(data[offset + i]);
-                serial_printCharacter(' ');
+                console_printHexByte(data[offset + i]);
+                console_printCharacter(' ');
             } else {
                 // padding for incomplete line
-                serial_printString("   ");
+                console_printString("   ");
             }
         }
 
         // --- ASCII separator ---
-        serial_printString(" |");
+        console_printString(" |");
 
         // --- Print ASCII representation ---
         for (i = 0; i < 16; i++) {
@@ -85,16 +91,16 @@ void menu_dumpHex(const uint8_t *data, uint16_t startAddress, uint16_t length)
                 uint8_t c = data[offset + i];
 
                 if (c >= 32 && c <= 126) {
-                    serial_printCharacter(c);
+                    console_printCharacter(c);
                 } else {
-                    serial_printCharacter('.');
+                    console_printCharacter('.');
                 }
             } else {
-                serial_printCharacter(' ');
+                console_printCharacter(' ');
             }
         }
 
-        serial_printString("|\n");
+        console_printString("|\n");
 
         offset += 16;
     }

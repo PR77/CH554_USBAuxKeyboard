@@ -13,6 +13,10 @@
 #include <stdint.h>
 #include "ch554.h"
 
+#ifndef WS2812_PIXEL_COUNT
+#define WS2812_PIXEL_COUNT  12
+#endif
+
 #ifndef WS2812_PORT
 #define WS2812_PORT          0x90
 #endif

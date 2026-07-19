@@ -9,6 +9,9 @@
 
 #include <stdint.h>
 #include <compiler.h>
+#include <string.h>
+#include <stdlib.h>
+#include <stdbool.h>
 #include "ch554.h"
 #include "firmware_info.h"
 #include "heartbeat.h"
@@ -16,31 +19,28 @@
 #include "tick.h"
 #include "i2c.h"
 #include "ssd1306.h"
-#include "serial.h"
 #include "bootloader.h"
 #include "ws2812.h"
 #include "rotary.h"
 #include "clickbtn.h"
 #include "device/usbhid.h"
+#include "console.h"
+#if defined (CONSOLE_OVER_SERIAL) || defined(CONSOLE_OVER_USB)
 #include "menu.h"
+#endif // CONSOLE_MENU_ENABLED or CONSOLE_OVER_USB
 #include "nvm.h"
 #include "hotkeys.h"
-
-#define SSD1306_GFX_ENABLED
-#undef CONSOLE_DEBUG_ENABLED
-#define CONSOLE_MENU_ENABLED
 
 #if defined(SSD1306_GFX_ENABLED)
 #include "main_gfx.h"
 #endif // SSD1306_GFX_ENABLED
 
-#if defined(CONSOLE_DEBUG_ENABLED) && defined(CONSOLE_MENU_ENABLED)
-#error Only CONSOLE_DEBUG_ENABLED or CONSOLE_MENU_ENABLED can be enabled. Please disable one of the configurations
+#if defined(CONSOLE_OVER_SERIAL) && defined(CONSOLE_OVER_USB)
+#error Only CONSOLE_OVER_SERIAL or CONSOLE_OVER_USB can be enabled. Please disable one of the configurations
 #endif
 
 #define LED_FLASH_RATE_MS           300
 #define WELCOME_SCREEN_DELAY_MS     800
-#define LOG(msg)                    {serial_printString(__FILE__); serial_printCharacter(' '); serial_printHexWord(__LINE__); serial_printCharacter(' '); serial_printString(msg); serial_printString("\n\r");}
 
 static void main_epHandler(uint8_t length, __xdata uint8_t *report) __reentrant {
 
@@ -53,7 +53,7 @@ static void main_epHandler(uint8_t length, __xdata uint8_t *report) __reentrant 
 
         for (uint8_t i = 0; i < WS2812_PIXEL_COUNT; i++) {
             ws2812_setPixelWheelColour(i, currentWS2812Colour + (i * (UINT8_MAX / (WS2812_PIXEL_COUNT - 1))));
-            ws2812_setPixelBrightess(i, brightness25Percent);
+            ws2812_setPixelBrightness(i, brightness25Percent);
         }
         ws2812_updatePixels();
     }
@@ -79,10 +79,10 @@ void main(void) {
     // Setup heartbeat LED
     heartbeat_initialise();
 
-#if defined(CONSOLE_DEBUG_ENABLED) || defined (CONSOLE_MENU_ENABLED)
+#if !defined(CONSOLE_OVER_USB) && defined (CONSOLE_OVER_SERIAL)
     // Setup serial port (debug)
     serial_initialiseSerial1(SERIAL_BAUD_RATE, 0);
-#endif // CONSOLE_DEBUG_ENABLED or CONSOLE_MENU_ENABLED
+#endif // !CONSOLE_OVER_USB and CONSOLE_OVER_SERIAL
 
     // Setup i2c and SSD1306 OLED
     i2c_initialise();
@@ -114,25 +114,23 @@ void main(void) {
     ws2812_initialise();
     ws2812_displayFullWheelColour(brightness25Percent);
 
-#if defined(CONSOLE_DEBUG_ENABLED) || defined (CONSOLE_MENU_ENABLED)
-    serial_printString("\x1b[2J\x1b[H");
-    serial_printString(FW_NAME);
-    serial_printCharacter(' ');
-    serial_printString(FW_VERSION);
-    serial_printCharacter(' ');
-    serial_printString(FW_DESC);
-    serial_printString("\n\r");
-#endif // CONSOLE_DEBUG_ENABLED or CONSOLE_MENU_ENABLED
+#if defined (CONSOLE_OVER_SERIAL)
+    console_printString("\x1b[2J\x1b[H");
+    console_printString(FW_NAME);
+    console_printCharacter(' ');
+    console_printString(FW_VERSION);
+    console_printCharacter(' ');
+    console_printString(FW_DESC);
+    console_printString("\n\r");
+#endif // CONSOLE_OVER_SERIAL
 
-#if defined(CONSOLE_MENU_ENABLED)
+#if defined (CONSOLE_OVER_SERIAL) || defined(CONSOLE_OVER_USB)
     menu_initialise();
-#endif // CONSOLE_MENU_ENABLED
+#endif // CONSOLE_OVER_SERIAL or CONSOLE_OVER_USB
 
-#if defined(CONSOLE_DEBUG_ENABLED) || defined (CONSOLE_MENU_ENABLED)
     hotkeys_displayPhysicalHotKeys();
     hotkeys_displayHotKeyHandlers();
     hotkeys_displayHotKeyMapping();
-#endif // CONSOLE_DEBUG_ENABLED or CONSOLE_MENU_ENABLED
 
     // Display welcome message and basic HMI elements
 #if defined(SSD1306_GFX_ENABLED)
@@ -153,22 +151,14 @@ void main(void) {
     // Cyclic loop application code starts here
     while (1) {
 
-#if defined(CONSOLE_DEBUG_ENABLED)
-        uint16_t characterToEcho = serial_getCharacter(0);
+#if defined (CONSOLE_OVER_SERIAL) || defined(CONSOLE_OVER_USB)
+        uint16_t consoleCharacter = console_getCharacter(0);
 
-        if ((characterToEcho != RECEIVE_TIMEOUT) && (characterToEcho != RECEIVE_NO_DATA_AVAIL)) {
-            serial_printCharacter((char)characterToEcho);
-        }
-#endif // CONSOLE_DEBUG_ENABLED
-
-#if defined(CONSOLE_MENU_ENABLED)
-        uint16_t consoleCharacter = serial_getCharacter(0);
-
-        if ((consoleCharacter != RECEIVE_TIMEOUT) && (consoleCharacter != RECEIVE_NO_DATA_AVAIL)) {
-            serial_printCharacter((char)consoleCharacter);
+        if ((consoleCharacter != CONSOLE_RECEIVE_TIMEOUT) && (consoleCharacter != CONSOLE_RECEIVE_NO_DATA_AVAIL)) {
+            console_printCharacter((char)consoleCharacter);
             menu_cyclicHandler((char)consoleCharacter);
         }
-#endif // CONSOLE_MENU_ENABLED
+#endif // CONSOLE_OVER_SERIAL or CONSOLE_OVER_USB
 
         if (bootloader_checkBootloaderRequest()) {
             ws2812_initialise();
@@ -221,7 +211,7 @@ void main(void) {
 
             for (uint8_t i = 0; i < WS2812_PIXEL_COUNT; i++) {
                 ws2812_setPixelWheelColour(i, currentWS2812Colour + (i * (UINT8_MAX / (WS2812_PIXEL_COUNT - 1))));
-                ws2812_setPixelBrightess(i, brightness25Percent);
+                ws2812_setPixelBrightness(i, brightness25Percent);
             }
             ws2812_updatePixels();
         }

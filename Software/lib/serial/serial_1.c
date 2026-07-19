@@ -132,14 +132,14 @@ uint16_t serial_isDataAvailableSerial1Interrupt(void) {
 
     // If receive buffer is not empty, then return RECEIVE_DATA_AVAIL.
     if (serial_receiveWriteIndex != serial_receiveReadIndex) {
-        return (RECEIVE_DATA_AVAIL);
+        return (SERIAL_RECEIVE_DATA_AVAIL);
     }
 
-    return (RECEIVE_NO_DATA_AVAIL);
+    return (SERIAL_RECEIVE_NO_DATA_AVAIL);
 }
 
-uint16_t serial_getByteSerial1Interrupt(uint32_t timeout) {
-    uint16_t receivedData = RECEIVE_NO_DATA_AVAIL;
+uint16_t serial_getByteSerial1Interrupt(uint8_t timeout) {
+    uint16_t receivedData = SERIAL_RECEIVE_NO_DATA_AVAIL;
     uint32_t previousCountTimeout = tick_get1msTimerCount();
 
     // If receive buffer is empty, then block for timeout period only if
@@ -148,8 +148,8 @@ uint16_t serial_getByteSerial1Interrupt(uint32_t timeout) {
     if (timeout != 0) {
         while (serial_receiveWriteIndex == serial_receiveReadIndex) {
 
-            if ((tick_get1msTimerCount() - previousCountTimeout) > timeout) {
-                return (RECEIVE_TIMEOUT);
+            if ((uint8_t)(tick_get1msTimerCount() - previousCountTimeout) > timeout) {
+                return (SERIAL_RECEIVE_TIMEOUT);
             }
         }
     }
@@ -172,15 +172,15 @@ uint16_t serial_getByteSerial1Interrupt(uint32_t timeout) {
 #endif // SERIAL_1_ENABLE_RX_INTERRUPTS
 
 #if !defined(SERIAL_1_ENABLE_RX_INTERRUPTS)
-uint16_t serial_getByteSerial1Blocking(uint32_t timeout) {
+uint16_t serial_getByteSerial1Blocking(uint8_t timeout) {
     uint32_t previousCountTimeout = tick_get1msTimerCount();
 
     // If receive indicator is not set, then block for timeout period
     // otherwise break out and report RECEIVE_TIMEOUT.
     while (U1RI == 0) {
 
-        if ((tick_get1msTimerCount() - previousCountTimeout) > timeout) {
-            return (RECEIVE_TIMEOUT);
+        if ((uint8_t)(tick_get1msTimerCount() - previousCountTimeout) > timeout) {
+            return (SERIAL_RECEIVE_TIMEOUT);
         }
     }
 
@@ -192,7 +192,6 @@ uint16_t serial_getByteSerial1Blocking(uint32_t timeout) {
 
 #if defined(SERIAL_1_ENABLE_TX_INTERRUPTS)
 void serial_sendByteSerial1Interrupt(uint8_t character) __reentrant {
-
     volatile uint8_t nextWriteIndex = (serial_transmitWriteIndex + 1) & SERIAL_1_TX_BUFFER_MASK;
 
     if (nextWriteIndex == serial_transmitReadIndex) {

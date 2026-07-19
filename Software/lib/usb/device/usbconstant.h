@@ -16,10 +16,7 @@
 #include <stdlib.h>
 #include "ch554.h"
 #include "usb.h"
-#include "usbhandler.h"
-#include "usbhid.h"
-
-#define USB_MAX_POWER_mA    500
+#include "usb_cfg.h"
 
 /** Type define for the device configuration descriptor structure. This must be
  * defined in the application code, as the configuration descriptor contains

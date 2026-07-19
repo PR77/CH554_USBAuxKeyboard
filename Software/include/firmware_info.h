@@ -5,11 +5,11 @@
 #define FW_VERSION          "1.0"
 #define FW_DESC             "WCH554 AUX KEYBOARD INTERFACE"
 #define FW_MFG              "PR77"
-#define FW_SLASH_1          " MACRO PAD OR3 "
-#define FW_SLASH_2          "    BY PR77    "
-#define FW_GIT              "eea6913"
-#define FW_BUILD_TIME       "2026-06-30 21:13:24"
-#define FW_BUILD_NUMBER     423
+#define FW_SPLASH_1         " MACRO PAD OR3 "
+#define FW_SPLASH_2         "    BY PR77    "
+#define FW_GIT              "276b06d"
+#define FW_BUILD_TIME       "2026-07-19 23:12:00"
+#define FW_BUILD_NUMBER     513
 
 // https://pid.codes/1209/2345/
 #define USB_VENDOR_ID       0x1209

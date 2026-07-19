@@ -14,7 +14,6 @@
 #include "ch554.h"
 #include "ws2812_cfg.h"
 
-#define WS2812_PIXEL_COUNT      12
 #define WS2812_BYTES_PER_PIXEL  3
 #define WS2812_T_RESET_US       50
 
@@ -34,7 +33,7 @@ typedef enum {
 
 void ws2812_initialise(void);
 void ws2812_setPixelWheelColour(uint8_t pixel, uint8_t wheelPosition);
-void ws2812_setPixelBrightess(uint8_t pixel, ws2812Brightness_e brightness);
+void ws2812_setPixelBrightness(uint8_t pixel, ws2812Brightness_e brightness);
 void ws2812_displayFullWheelColour(ws2812Brightness_e brightness);
 void ws2812_updatePixels(void);
 static void ws2812_sendByte(uint8_t data);

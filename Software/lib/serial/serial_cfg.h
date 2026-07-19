@@ -14,19 +14,11 @@
 #include "ch554.h"
 
 #ifndef SERIAL_BAUD_RATE
-#define SERIAL_BAUD_RATE        57600
+#define SERIAL_BAUD_RATE                57600
 #endif
 
-#define RECEIVE_TIMEOUT         (uint16_t)UINT16_MAX
-#define RECEIVE_NO_DATA_AVAIL   (uint16_t)(UINT16_MAX - 1)
-#define RECEIVE_DATA_AVAIL      (uint16_t)(UINT16_MAX - 2)
-
-#ifndef CONSOLE_PORT_PUTCHR
-#define CONSOLE_PORT_PUTCHR(x)  serial_sendByteSerial1(x)
-#endif
-
-#ifndef CONSOLE_PORT_GETCHR
-#define CONSOLE_PORT_GETCHR(x)   serial_getByteSerial1(x)
-#endif
+#define SERIAL_RECEIVE_TIMEOUT          (uint16_t)UINT16_MAX
+#define SERIAL_RECEIVE_NO_DATA_AVAIL    (uint16_t)(UINT16_MAX - 1)
+#define SERIAL_RECEIVE_DATA_AVAIL       (uint16_t)(UINT16_MAX - 2)
 
 #endif // __CH554_SERIAL_CFG_H__

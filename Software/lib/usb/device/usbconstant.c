@@ -13,8 +13,9 @@
 #include <stdlib.h>
 #include "ch554.h"
 #include "firmware_info.h"
-#include "usbconstant.h"
 #include "usb.h"
+#include "usb_cfg.h"
+#include "usbconstant.h"
 
 // References - ch55xduino
 // Project Files (Github):  https://github.com/DeqingSun/ch55xduino/tree/ch55xduino

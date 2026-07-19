@@ -16,12 +16,13 @@
 #include <stdlib.h>
 #include "ch554.h"
 #include "usb.h"
-#include "usbconstant.h"
+#include "usb_cfg.h"
+#if defined(USE_USB_HID)
 #include "usbhid.h"
-
-#define EP0_ADDR            0x0380
-#define EP1_ADDR            0x03C0
-#define EP2_ADDR            0x03E0
+#endif // USE_USB_HID
+#if defined(USE_USB_CDC)
+#include "usbcdc.h"
+#endif // USE_USB_CDC
 
 extern __xdata __at (EP0_ADDR) uint8_t Ep0Buffer[DEFAULT_ENDP0_SIZE];
 extern __xdata __at (EP1_ADDR) uint8_t Ep1Buffer[DEFAULT_ENDP1_SIZE];

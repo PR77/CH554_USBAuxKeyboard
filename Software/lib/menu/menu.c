@@ -11,27 +11,28 @@
 #include <compiler.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include "ch554.h"
 #include "menu.h"
 #include "menu_cfg.h"
 #include "menu_helper.h"
 
-static __xdata uint8_t commandBuffer[MENU_COMMAND_BUFFER_SIZE];
-static __xdata uint8_t commandBufferIndex;
+static __xdata uint8_t menu_commandBuffer[MENU_COMMAND_BUFFER_SIZE];
+static __xdata uint8_t menu_commandBufferIndex;
 
 void menu_initialise(void) {
 
-    memset(&commandBuffer, 0, sizeof(commandBuffer));
-    commandBufferIndex = 0;
+    memset(&menu_commandBuffer, 0, sizeof(menu_commandBuffer));
+    menu_commandBufferIndex = 0;
 }
 
 void menu_processCommand(void) {
 
-    char *command = commandBuffer, *argument = NULL;
+    char *command = menu_commandBuffer, *argument = NULL;
 
     // Delimit command and argument. Only 1 space between command and argument
     // is supported to keep this simple.
-    for (char *tempPtr = commandBuffer; *tempPtr; tempPtr++) {
+    for (char *tempPtr = menu_commandBuffer; *tempPtr; tempPtr++) {
         if (*tempPtr == ' ') {
             // Space found after command, so delimit command and substitute the space
             // with NULL terminator.
@@ -42,17 +43,15 @@ void menu_processCommand(void) {
         }
     }
 
-    if (command != NULL) {
-        for (uint8_t i = 0; i < menu_getNumberOfMenuEnteries(); i++) {
-            if ((command[0] | 0x20) == menuEntries[i].commandName) {
-                // Since commands are only 1 character, check the first character only.
-                // Additionally, OR the command character (ASCII) with 0x20 to allow for
-                // case to be ignored. Lowercase has a higher ASCII value (offset of 0x20).
-                if (menuEntries[i].commandHandler != NULL) {
-                    menuEntries[i].commandHandler(argument);
-                }
-                break;
+    for (uint8_t i = 0; i < menu_getNumberOfMenuEnteries(); i++) {
+        if ((command[0] | 0x20) == menuEntries[i].commandName) {
+            // Since commands are only 1 character, check the first character only.
+            // Additionally, OR the command character (ASCII) with 0x20 to allow for
+            // case to be ignored. Lowercase has a higher ASCII value (offset of 0x20).
+            if (menuEntries[i].commandHandler != NULL) {
+                menuEntries[i].commandHandler(argument);
             }
+            break;
         }
     }
 
@@ -60,23 +59,22 @@ void menu_processCommand(void) {
 } 
 
 void menu_cyclicHandler(char character) {
-
      if (character == '\r') {
-        commandBuffer[commandBufferIndex] = 0;
+        menu_commandBuffer[menu_commandBufferIndex] = 0;
         menu_processCommand();
-        commandBufferIndex = 0;
-    } else if (character == '\b') {
-        if (commandBufferIndex > 0) {
-            commandBuffer[commandBufferIndex] = 0;
-            commandBufferIndex--;
+        menu_commandBufferIndex = 0;
+    } else if (character == '\b' || character == 0x7F) {
+        if (menu_commandBufferIndex > 0) {
+            menu_commandBufferIndex--;
+            menu_commandBuffer[menu_commandBufferIndex] = 0;
         }
     }  else {
-        if (commandBufferIndex < (MENU_COMMAND_BUFFER_SIZE - 1)) {
-            commandBuffer[commandBufferIndex] = character;
-            commandBufferIndex++;
+        if (menu_commandBufferIndex < (MENU_COMMAND_BUFFER_SIZE - 1)) {
+            menu_commandBuffer[menu_commandBufferIndex] = character;
+            menu_commandBufferIndex++;
         } else {
             menu_signalError();
-            commandBufferIndex = 0;
+            menu_commandBufferIndex = 0;
         }
     }
 }

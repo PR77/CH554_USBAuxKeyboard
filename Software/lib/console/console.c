@@ -1,10 +1,10 @@
 /********************************** (C) COPYRIGHT *******************************
-* File Name     : SERIAL.C
+* File Name     : CONSOLE.C
 * Author        : Paul Raspa (PR77)
 * License       : MIT
 * Version       : V1.0
-* Date          : 2025/02/06
-* Description   : 8051 UART Common
+* Date          : 2026/07/10
+* Description   : Console Common
 *******************************************************************************/
 
 #include <stdint.h>
@@ -13,9 +13,8 @@
 #include <string.h>
 #include <stdlib.h>
 #include "ch554.h"
-#include "serial_0.h"
-#include "serial_1.h"
-#include "serial_cfg.h"
+#include "console.h"
+#include "console_cfg.h"
 
 // HEX encoding table
 static const uint8_t hexTable[] = {
@@ -25,16 +24,16 @@ static const uint8_t hexTable[] = {
     'C', 'D', 'E', 'F'
 };
 
-void serial_printCharacter(char character) {
+void console_printCharacter(char character) {
     CONSOLE_PORT_PUTCHR(character);
+    CONSOLE_PORT_FLUSH();
 }
 
-uint16_t serial_getCharacter(uint32_t timeout) {
+uint16_t console_getCharacter(uint32_t timeout) {
     return (CONSOLE_PORT_GETCHR(timeout));
 }
 
-void serial_printStringPadded(char *string, uint8_t stringPaddingSize) {
-    
+void console_printStringPadded(char *string, uint8_t stringPaddingSize) {
     uint8_t stringIndex = 0;
 
     if (string != NULL) {
@@ -53,10 +52,11 @@ void serial_printStringPadded(char *string, uint8_t stringPaddingSize) {
         CONSOLE_PORT_PUTCHR(' ');
         stringIndex++;
     }
+
+    CONSOLE_PORT_FLUSH();
 }
 
-void serial_printStringTitle(char *string, uint8_t totalLineLength, char paddingCharacter, bool addNewLine) {
-
+void console_printStringTitle(char *string, uint8_t totalLineLength, char paddingCharacter, bool addNewLine) {
     uint8_t numberOfPadCharacters = 0;
     uint8_t stringLength = strlen(string);
     
@@ -85,9 +85,11 @@ void serial_printStringTitle(char *string, uint8_t totalLineLength, char padding
     if (addNewLine) {
         CONSOLE_PORT_PUTCHR('\n'); 
     }
+
+    CONSOLE_PORT_FLUSH();
 }
 
-void serial_printString(char* string) {
+void console_printString(char* string) {
 
     if (string == NULL) {
         return;
@@ -98,14 +100,17 @@ void serial_printString(char* string) {
         // on the console.
         CONSOLE_PORT_PUTCHR(*string++);
     }
+
+    CONSOLE_PORT_FLUSH();
 }
 
-void serial_printHexByte(uint8_t value) {
+void console_printHexByte(uint8_t value) {
     CONSOLE_PORT_PUTCHR(hexTable[(value >> 4)]);
     CONSOLE_PORT_PUTCHR(hexTable[value & 0x0F]);
+    CONSOLE_PORT_FLUSH();
 }
 
-void serial_printHexWord(uint16_t value) {
-    serial_printHexByte(value >> 8);
-    serial_printHexByte(value & 0xFF);
+void console_printHexWord(uint16_t value) {
+    console_printHexByte(value >> 8);
+    console_printHexByte(value & 0xFF);
 }

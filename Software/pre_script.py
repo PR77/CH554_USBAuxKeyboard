@@ -3,7 +3,7 @@ import os
 import subprocess
 from datetime import datetime
 
-# ----------------------------
+# -----------------------------------------------------------------------------
 # Project metadata (EDIT HERE)
 # ----------------------------
 PROJECT_NAME = "MacroPad OR3"
