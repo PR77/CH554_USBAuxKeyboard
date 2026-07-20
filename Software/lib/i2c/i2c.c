@@ -115,8 +115,8 @@ uint8_t i2c_readByte(bool sendAck) {
 
     for (uint8_t i = 0; i < I2C_DATA_LENGTH; i++) {
         data <<= 1;
-        I2C_DELAY_H();
         I2C_SCLK = 1;
+        I2C_DELAY_H();
 
         if (I2C_SDAT) {
             data |= 0x01;
