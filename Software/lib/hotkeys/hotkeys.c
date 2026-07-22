@@ -53,7 +53,7 @@ void hotkeys_initialise(void) {
     if (nvm_readBlock((uint8_t *)hotKeyMap, sizeof(hotKeyMap_s) * NUMBER_OF_PHYSICAL_HOTKEYS) != nvmOk) {
 
         console_printString("\nhotKeyMapDefaults RESTORED\n");
-        memcpy(hotKeyMap, hotKeyMapDefaults, 20);//sizeof(hotKeyMap_s) * NUMBER_OF_PHYSICAL_HOTKEYS);
+        memcpy(hotKeyMap, hotKeyMapDefaults, sizeof(hotKeyMap_s) * NUMBER_OF_PHYSICAL_HOTKEYS);
     }
 }
 
