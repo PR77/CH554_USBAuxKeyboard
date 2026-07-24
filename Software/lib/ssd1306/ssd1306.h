@@ -14,7 +14,7 @@
 #include "ch554.h"
 
 // OLED definitions
-#define OLED_ADDR         0x78    // OLED write address (0x3C << 1)
+#define OLED_ADDR         0x78    // OLED write address
 #define OLED_CMD_MODE     0x00    // set command mode
 #define OLED_DAT_MODE     0x40    // set data mode
 

@@ -25,6 +25,10 @@
 #include "device/usbcdc.h"
 #endif // CONSOLE_OVER_USB
 
+#define CONSOLE_DECIMAL_DIGITS_MAX  7   // sign character, 5 digits and NULL.
+#define CONSOLE_U16_STR_DIGITS      5   // digits in max uint16_t value: 65535
+#define CONSOLE_I16_STR_DIGITS      5   // digits in max uint16_t value: +/-32768
+
 #ifndef CONSOLE_PORT_PUTCHR
 #if defined(CONSOLE_OVER_SERIAL)
 #define CONSOLE_PORT_PUTCHR(x)      serial_sendByteSerial1(x)
