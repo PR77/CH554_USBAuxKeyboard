@@ -7,9 +7,9 @@
 #define FW_MFG              "PR77"
 #define FW_SPLASH_1         " MACRO PAD OR3 "
 #define FW_SPLASH_2         "    BY PR77    "
-#define FW_GIT              "276b06d"
-#define FW_BUILD_TIME       "2026-07-19 23:12:00"
-#define FW_BUILD_NUMBER     513
+#define FW_GIT              "1d93c4f"
+#define FW_BUILD_TIME       "2026-07-24 21:13:31"
+#define FW_BUILD_NUMBER     519
 
 // https://pid.codes/1209/2345/
 #define USB_VENDOR_ID       0x1209

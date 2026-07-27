@@ -16,7 +16,7 @@
 #include "console.h"
 #include "console_cfg.h"
 
-// Buffer for int16_t / uint16_t to decimal string converion.
+// Buffer for uint16_t to decimal string converion.
 __xdata uint8_t console_conversionBuffer[CONSOLE_DECIMAL_DIGITS_MAX];
 
 // HEX encoding table
@@ -122,33 +122,6 @@ void console_printUnsignedDecimalWord(uint16_t value) {
     }
 
     console_conversionBuffer[CONSOLE_U16_STR_DIGITS] = 0;
-    console_printString(console_conversionBuffer);
-}
-
-void console_printSignedDecimalWord(int16_t value) {
-
-    if (value < 0) {
-        console_conversionBuffer[0] = '-';
-
-        // Convert value to positive to ensure the decimal conversion logic works.
-        value = -value;
-    } else {
-        console_conversionBuffer[0] = '+';
-    }
-    
-    // Writes exactly CONSOLE_I16_STR_DIGITS zero-padded characters into buffer, 
-    // followed by a null terminator. Digits are extracted least-significant-first and
-    // written directly into their final position, so no reversal pass is required.
-    //
-    // 'i' counts down from CONSOLE_I16_STR_DIGITS to 1, decremented in the loop's third
-    // clause and used after subtracting 1 each time - so it only ever indexes buffer 
-    // as [0, digits-1].
-    for (uint8_t i = CONSOLE_I16_STR_DIGITS; i > 0; i--) {
-        console_conversionBuffer[i] = (char)('0' + (uint8_t)(value % 10));
-        value /= 10; 
-    }
-
-    console_conversionBuffer[CONSOLE_I16_STR_DIGITS + 1] = 0;
     console_printString(console_conversionBuffer);
 }
 

@@ -40,7 +40,6 @@
 #endif
 
 #define LED_FLASH_RATE_MS           300
-#define WELCOME_SCREEN_DELAY_MS     800
 
 static void main_epHandler(uint8_t length, __xdata uint8_t *report) __reentrant {
 

@@ -120,7 +120,7 @@ void ssd1306_drawBmp(uint8_t xPosition, uint8_t yPosition, uint8_t xSize, uint8_
 void ssd1306_printCharacter(char character) {
     uint16_t offset = 0;
 
-    if (character >= 32) {
+    if ((character >= 32) && (character < (OLED_FONT_CHAR_COUNT + 32))) {
         offset = character - 32;
     } else {
         return;

@@ -40,7 +40,6 @@ void console_printStringPadded(char *string, uint8_t stringPaddingSize);
 void console_printStringTitle(char *string, uint8_t totalLineLength, char paddingCharacter, bool addNewLine);
 void console_printString(char* string);
 void console_printUnsignedDecimalWord(uint16_t value);
-void console_printSignedDecimalWord(int16_t value);
 void console_printHexByte(uint8_t value);
 void console_printHexWord(uint16_t value);
 
