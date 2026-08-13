@@ -25,7 +25,7 @@
 
 #define DEBOUNCE_TIME_MS            20
 #define MULTI_CLICK_TIME_MS         250
-#define LONG_CLICK_TIME_MS          1000
+#define LONG_CLICK_TIME_MS          500
 
 #ifndef ROTARY_ENC_SW_PORT
 #define ROTARY_ENC_SW_PORT          P3

@@ -39,6 +39,7 @@ void clickbtn_initialise(void);
 static uint8_t clickbtn_readRotaryEncSwPort(void);
 static uint8_t clickbtn_readMacroSw1Port(void);
 static uint8_t clickbtn_readMacroSw2Port(void);
+static uint8_t clickbtn_readMacroSw3Port(void);
 __xdata clickBtn_s* clickbtn_getButtonState(uint8_t buttonObjectIndex);
 void clickbtn_cyclicHandler(void);
 

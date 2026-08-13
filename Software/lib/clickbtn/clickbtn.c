@@ -26,7 +26,6 @@ static const inputPort_s buttonPorts[NUMBER_OF_BUTTONS] = {
     {clickbtn_readMacroSw1Port,     (1 << MACRO_1_SW_PIN)},
     {clickbtn_readMacroSw2Port,     (1 << MACRO_2_SW_PIN)},
     {clickbtn_readMacroSw3Port,     (1 << MACRO_3_SW_PIN)}
-
 };
 
 void clickbtn_initialise(void) {
