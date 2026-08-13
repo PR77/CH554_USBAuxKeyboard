@@ -58,7 +58,7 @@ static const uint8_t OLED_INIT_CMD[] = {
     OLED_VCOMH_LEVEL, 0x40,         // VCOMH setting
     OLED_PRE_CHARGE, 0xF1,          // pre-charge period
     OLED_DISPLAY_ON,                // switch on OLED
-    OLED_XFLIP_OFF, OLED_YFLIP_OFF  // flip the screen
+    OLED_XFLIP, OLED_YFLIP          // flip the screen
 };
 
 // HEX encoding table

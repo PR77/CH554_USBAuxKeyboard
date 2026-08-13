@@ -24,7 +24,9 @@ static __xdata clickBtn_s buttonObjects[NUMBER_OF_BUTTONS];
 static const inputPort_s buttonPorts[NUMBER_OF_BUTTONS] = {
     {clickbtn_readRotaryEncSwPort,  (1 << ROTARY_ENC_SW_PIN)},
     {clickbtn_readMacroSw1Port,     (1 << MACRO_1_SW_PIN)},
-    {clickbtn_readMacroSw2Port,     (1 << MACRO_2_SW_PIN)}
+    {clickbtn_readMacroSw2Port,     (1 << MACRO_2_SW_PIN)},
+    {clickbtn_readMacroSw3Port,     (1 << MACRO_3_SW_PIN)}
+
 };
 
 void clickbtn_initialise(void) {
@@ -37,6 +39,9 @@ void clickbtn_initialise(void) {
 
     MACRO_2_SW_MOD_OC = MACRO_2_SW_MOD_OC & ~(1 << MACRO_2_SW_PIN);
     MACRO_2_SW_DIR_PU = MACRO_2_SW_DIR_PU | (1 << MACRO_2_SW_PIN);
+
+    MACRO_3_SW_MOD_OC = MACRO_3_SW_MOD_OC & ~(1 << MACRO_3_SW_PIN);
+    MACRO_3_SW_DIR_PU = MACRO_3_SW_DIR_PU | (1 << MACRO_3_SW_PIN);
 
     memset(buttonObjects, 0, (sizeof(clickBtn_s) * NUMBER_OF_BUTTONS));
 }
@@ -51,6 +56,10 @@ static uint8_t clickbtn_readMacroSw1Port(void) {
 
 static uint8_t clickbtn_readMacroSw2Port(void) {
     return (MACRO_2_SW_PORT);
+}
+
+static uint8_t clickbtn_readMacroSw3Port(void) {
+    return (MACRO_3_SW_PORT);
 }
 
 __xdata clickBtn_s* clickbtn_getButtonState(uint8_t buttonObjectIndex) {

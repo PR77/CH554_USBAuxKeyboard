@@ -208,6 +208,57 @@ void usbhid_keyboardLockWorkstation(void) {
     usbhid_ep1SendReport(usbhid_keyboardReport, USBHID_KEYBOARD_REPORT_SIZE);
 }
 
+void usbhid_keyboardSendCharacterA(void) {
+
+    // Keyboard key press
+    usbhid_keyboardReport[0] = USBHID_KEYBOARD_REPORT_ID;
+    usbhid_keyboardReport[1] = 0;
+    usbhid_keyboardReport[2] = 0;
+    usbhid_keyboardReport[3] = KBD_KEY_A;
+    usbhid_ep1SendReport(usbhid_keyboardReport, USBHID_KEYBOARD_REPORT_SIZE);
+
+    // Keyboard key release
+    usbhid_keyboardReport[0] = USBHID_KEYBOARD_REPORT_ID;
+    usbhid_keyboardReport[1] = 0;
+    usbhid_keyboardReport[2] = 0;
+    usbhid_keyboardReport[3] = 0;
+    usbhid_ep1SendReport(usbhid_keyboardReport, USBHID_KEYBOARD_REPORT_SIZE);
+}
+
+void usbhid_keyboardSendCharacterB(void) {
+
+    // Keyboard key press
+    usbhid_keyboardReport[0] = USBHID_KEYBOARD_REPORT_ID;
+    usbhid_keyboardReport[1] = 0;
+    usbhid_keyboardReport[2] = 0;
+    usbhid_keyboardReport[3] = KBD_KEY_B;
+    usbhid_ep1SendReport(usbhid_keyboardReport, USBHID_KEYBOARD_REPORT_SIZE);
+
+    // Keyboard key release
+    usbhid_keyboardReport[0] = USBHID_KEYBOARD_REPORT_ID;
+    usbhid_keyboardReport[1] = 0;
+    usbhid_keyboardReport[2] = 0;
+    usbhid_keyboardReport[3] = 0;
+    usbhid_ep1SendReport(usbhid_keyboardReport, USBHID_KEYBOARD_REPORT_SIZE);
+}
+
+void usbhid_keyboardSendCharacterC(void) {
+
+    // Keyboard key press
+    usbhid_keyboardReport[0] = USBHID_KEYBOARD_REPORT_ID;
+    usbhid_keyboardReport[1] = 0;
+    usbhid_keyboardReport[2] = 0;
+    usbhid_keyboardReport[3] = KBD_KEY_C;
+    usbhid_ep1SendReport(usbhid_keyboardReport, USBHID_KEYBOARD_REPORT_SIZE);
+
+    // Keyboard key release
+    usbhid_keyboardReport[0] = USBHID_KEYBOARD_REPORT_ID;
+    usbhid_keyboardReport[1] = 0;
+    usbhid_keyboardReport[2] = 0;
+    usbhid_keyboardReport[3] = 0;
+    usbhid_ep1SendReport(usbhid_keyboardReport, USBHID_KEYBOARD_REPORT_SIZE);
+}
+
 void usbhid_nullHandler(void) {
     
 }

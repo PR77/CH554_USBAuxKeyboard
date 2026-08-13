@@ -45,6 +45,9 @@ const hotKeyHandler_s hotKeyHandlers[NUMBER_OF_HOTKEY_HANDLERS] = {
     {consumerMediaBrowser,      "usbhid_consumerMediaBrowser",      usbhid_consumerMediaBrowser},
     {consumerMediaEditor,       "usbhid_consumerMediaEditor",       usbhid_consumerMediaEditor},
     {consumerMediaCalculator,   "usbhid_consumerMediaCalculator",   usbhid_consumerMediaCalculator},
+    {keyboardSendCharacterA,    "usbhid_keyboardSendCharacterA",    usbhid_keyboardSendCharacterA},
+    {keyboardSendCharacterB,    "usbhid_keyboardSendCharacterB",    usbhid_keyboardSendCharacterB},
+    {keyboardSendCharacterC,    "usbhid_keyboardSendCharacterC",    usbhid_keyboardSendCharacterC},
     {nullHandler,               "usbhid_nullHandler",               usbhid_nullHandler},
 };
 

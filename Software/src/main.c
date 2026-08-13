@@ -14,7 +14,6 @@
 #include <stdbool.h>
 #include "ch554.h"
 #include "firmware_info.h"
-#include "heartbeat.h"
 #include "system.h"
 #include "tick.h"
 #include "i2c.h"
@@ -60,7 +59,6 @@ static void main_epHandler(uint8_t length, __xdata uint8_t *report) __reentrant 
 
 void main(void) {
     __xdata rotaryDirection_e currentRotaryDirection = noRotation;
-    __xdata uint32_t previousCountLEDFlash = 0;
     __xdata uint8_t currentWS2812Colour = 0;
 #if defined(SSD1306_GFX_ENABLED)
     __xdata uint8_t currentImageIndex = 0;
@@ -74,9 +72,6 @@ void main(void) {
     // Setup timer ticks
     tick_initialiseTimer0();
     tick_enableTimer0Interrupt();
-
-    // Setup heartbeat LED
-    heartbeat_initialise();
 
 #if !defined(CONSOLE_OVER_USB) && defined (CONSOLE_OVER_SERIAL)
     // Setup serial port (debug)
@@ -105,6 +100,17 @@ void main(void) {
 
     // Enable global interrupts
     system_enableGlobalInterupts();
+
+    // Check if conditions to enter bootloader are present before continuing
+    if (bootloader_checkBootloaderRequest()) {
+        ws2812_initialise();
+        ws2812_updatePixels();
+        usbhid_deinitialise();
+        ssd1306_clearScreen();
+        ssd1306_setCursor(0, 0);
+        ssd1306_printString("---- BOOT LOADER ----");
+        bootloader_enter();
+    }
 
     // Setup Hotkey handler
     hotkeys_initialise();
@@ -147,9 +153,18 @@ void main(void) {
         }
     }
 
+    if (bootloader_checkBootloaderRequest()) {
+        ws2812_initialise();
+        ws2812_updatePixels();
+        usbhid_deinitialise();
+        ssd1306_clearScreen();
+        ssd1306_setCursor(0, 0);
+        ssd1306_printString("---- BOOT LOADER ----");
+        bootloader_enter();
+    }
+
     // Cyclic loop application code starts here
     while (1) {
-
 #if defined (CONSOLE_OVER_SERIAL) || defined(CONSOLE_OVER_USB)
         uint16_t consoleCharacter = console_getCharacter(0);
 
@@ -158,22 +173,6 @@ void main(void) {
             menu_cyclicHandler((char)consoleCharacter);
         }
 #endif // CONSOLE_OVER_SERIAL or CONSOLE_OVER_USB
-
-        if (bootloader_checkBootloaderRequest()) {
-            ws2812_initialise();
-            ws2812_updatePixels();
-            usbhid_deinitialise();
-            ssd1306_clearScreen();
-            ssd1306_setCursor(0, 0);
-            ssd1306_printString("---- BOOT LOADER ----");
-            bootloader_enter();
-        }
-
-        if ((tick_get1msTimerCount() - previousCountLEDFlash) > LED_FLASH_RATE_MS) {
-            previousCountLEDFlash += LED_FLASH_RATE_MS;
-
-            heartbeat_toggleState();
-        }
 
         rotary_cyclicHanlder();
         clickbtn_cyclicHandler();
@@ -239,11 +238,11 @@ void main(void) {
             hotkeys_triggerHotKeyHandler(macroSwitch2Long);
         }
 
-        if (clickbtn_getButtonState(MACRO_2_SW_INDEX /*Change to MACRO_3_SW_INDEX in final PCB*/)->clicks > 0) {
+        if (clickbtn_getButtonState(MACRO_3_SW_INDEX)->clicks > 0) {
             hotkeys_triggerHotKeyHandler(macroSwitch3Short);
         }
 
-        if (clickbtn_getButtonState(MACRO_2_SW_INDEX /*Change to MACRO_3_SW_INDEX in final PCB*/)->clicks < 0) {
+        if (clickbtn_getButtonState(MACRO_3_SW_INDEX)->clicks < 0) {
             hotkeys_triggerHotKeyHandler(macroSwitch3Long);
         }
     }

@@ -26,7 +26,7 @@
 #endif
 
 #ifndef BOOTLOADER_PIN
-#define BOOTLOADER_PIN          3
+#define BOOTLOADER_PIN          1
 #endif
 
 #endif // __CH554_BOOTLOADER_CFG_H__

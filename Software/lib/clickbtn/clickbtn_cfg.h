@@ -16,30 +16,31 @@
 #include <stdlib.h>
 #include "ch554.h"
 
-#define NUMBER_OF_BUTTONS           3
+#define NUMBER_OF_BUTTONS           4
 
 #define ROTARY_ENC_SW_INDEX         0
 #define MACRO_1_SW_INDEX            1
 #define MACRO_2_SW_INDEX            2
+#define MACRO_3_SW_INDEX            3
 
 #define DEBOUNCE_TIME_MS            20
 #define MULTI_CLICK_TIME_MS         250
 #define LONG_CLICK_TIME_MS          1000
 
 #ifndef ROTARY_ENC_SW_PORT
-#define ROTARY_ENC_SW_PORT          P1
+#define ROTARY_ENC_SW_PORT          P3
 #endif
 
 #ifndef ROTARY_ENC_SW_MOD_OC
-#define ROTARY_ENC_SW_MOD_OC        P1_MOD_OC
+#define ROTARY_ENC_SW_MOD_OC        P3_MOD_OC
 #endif
 
 #ifndef ROTARY_ENC_SW_DIR_PU
-#define ROTARY_ENC_SW_DIR_PU        P1_DIR_PU
+#define ROTARY_ENC_SW_DIR_PU        P3_DIR_PU
 #endif
 
 #ifndef ROTARY_ENC_SW_PIN
-#define ROTARY_ENC_SW_PIN           2
+#define ROTARY_ENC_SW_PIN           5
 #endif
 
 #ifndef MACRO_1_SW_PORT
@@ -55,23 +56,39 @@
 #endif
 
 #ifndef MACRO_1_SW_PIN
-#define MACRO_1_SW_PIN              2
+#define MACRO_1_SW_PIN              0
 #endif
 
 #ifndef MACRO_2_SW_PORT
-#define MACRO_2_SW_PORT             P1
+#define MACRO_2_SW_PORT             P3
 #endif
 
 #ifndef MACRO_2_SW_MOD_OC
-#define MACRO_2_SW_MOD_OC           P1_MOD_OC
+#define MACRO_2_SW_MOD_OC           P3_MOD_OC
 #endif
 
 #ifndef MACRO_2_SW_DIR_PU
-#define MACRO_2_SW_DIR_PU           P1_DIR_PU
+#define MACRO_2_SW_DIR_PU           P3_DIR_PU
 #endif
 
 #ifndef MACRO_2_SW_PIN
-#define MACRO_2_SW_PIN              4
+#define MACRO_2_SW_PIN              1
+#endif
+
+#ifndef MACRO_3_SW_PORT
+#define MACRO_3_SW_PORT             P3
+#endif
+
+#ifndef MACRO_3_SW_MOD_OC
+#define MACRO_3_SW_MOD_OC           P3_MOD_OC
+#endif
+
+#ifndef MACRO_3_SW_DIR_PU
+#define MACRO_3_SW_DIR_PU           P3_DIR_PU
+#endif
+
+#ifndef MACRO_3_SW_PIN
+#define MACRO_3_SW_PIN              3
 #endif
 
 #endif // __CH554_CLICKBTN_CFG_H__

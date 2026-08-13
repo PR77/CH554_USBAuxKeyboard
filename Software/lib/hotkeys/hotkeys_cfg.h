@@ -36,6 +36,9 @@ typedef enum {
     consumerMediaBrowser,
     consumerMediaEditor,
     consumerMediaCalculator,
+    keyboardSendCharacterA,
+    keyboardSendCharacterB,
+    keyboardSendCharacterC,
     nullHandler,
 
     NUMBER_OF_HOTKEY_HANDLERS

@@ -26,7 +26,7 @@
 #endif
 
 #ifndef ROTARY_ENC_A_PIN
-#define ROTARY_ENC_A_PIN            1
+#define ROTARY_ENC_A_PIN            2
 #endif
 
 #ifndef ROTARY_ENC_B_PORT
@@ -42,7 +42,7 @@
 #endif
 
 #ifndef ROTARY_ENC_B_PIN
-#define ROTARY_ENC_B_PIN            0
+#define ROTARY_ENC_B_PIN            3
 #endif
 
 #endif // __CH554_ROTARY_CFG_H__

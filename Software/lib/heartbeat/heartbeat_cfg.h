@@ -14,23 +14,19 @@
 #include "ch554.h"
 
 #ifndef HEARTBEAT_PORT
-#define HEARTBEAT_PORT          0x90
+#define HEARTBEAT_PORT      0x90
 #endif
 
 #ifndef HEARTBEAT_MOD_OC
-#define HEARTBEAT_MOD_OC        P1_MOD_OC
+#define HEARTBEAT_MOD_OC    P1_MOD_OC
 #endif
 
 #ifndef HEARTBEAT_DIR_PU
-#define HEARTBEAT_DIR_PU        P1_DIR_PU
+#define HEARTBEAT_DIR_PU    P1_DIR_PU
 #endif
 
 #ifndef HEARTBEAT_PIN
-#if defined(PCB_LAYOUT)
-    #define HEARTBEAT_PIN       5
-    #else
-    #define HEARTBEAT_PIN       4
-#endif
+#define HEARTBEAT_PIN       4
 #endif
 
 #endif // __CH554_HEARTBEAT_CFG_H__
