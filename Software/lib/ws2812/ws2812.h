@@ -15,7 +15,6 @@
 #include "ws2812_cfg.h"
 
 #define WS2812_BYTES_PER_PIXEL  3
-#define WS2812_T_RESET_US       50
 
 typedef struct {
     uint8_t red;
