@@ -9,6 +9,9 @@
 
 #include <stdint.h>
 #include <compiler.h>
+#include <string.h>
+#include <stdlib.h>
+#include <stdbool.h>
 #include "ch554.h"
 #include "i2c.h"
 #include "ssd1306.h"
@@ -44,6 +47,8 @@
 // -----------------------------------------------------------------------------
 // OLED Implementation
 // -----------------------------------------------------------------------------
+
+static bool ssd1306_invertText = false;
 
 // OLED init settings
 static const uint8_t OLED_INIT_CMD[] = {
@@ -116,9 +121,16 @@ void ssd1306_drawBmp(uint8_t xPosition, uint8_t yPosition, uint8_t xSize, uint8_
     }
 }
 
+// OLED set or clear invert image
+void ssd1306_setClearInvert(bool invert) {
+    
+    ssd1306_invertText = invert;
+}
+
 // OLED print a character
 void ssd1306_printCharacter(char character) {
     uint16_t offset = 0;
+    uint8_t columnData = 0;
 
     if ((character >= 32) && (character < (OLED_FONT_CHAR_COUNT + 32))) {
         offset = character - 32;
@@ -129,10 +141,13 @@ void ssd1306_printCharacter(char character) {
     offset += offset << 2;                  // -> offset = (ch - 32) * 5
     i2c_startCommunication(OLED_ADDR);
     i2c_writeByte(OLED_DAT_MODE);    
-    i2c_writeByte(0x00);                    // print spacing between characters
+
+    // print spacing between characters
+    i2c_writeByte((ssd1306_invertText == true) ? 0xFF : 0x00);
     
     for(uint8_t i = 0; i < OLED_FONT_WIDTH; i++) {
-        i2c_writeByte(OLED_FONT[offset++]);
+        columnData = OLED_FONT[offset++];
+        i2c_writeByte((ssd1306_invertText == true) ? (columnData ^ 0xFF) : columnData);
     }
     i2c_stopCommunication();
 }
@@ -183,24 +198,5 @@ void ssd1306_clearScreen(void) {
             i2c_writeByte(0x00);
         }
         i2c_stopCommunication();                // stop transmission
-    }
-}
-
-void ssd1306_test(void) {
-    // print all characters on 4 lines, 20 per line
-    uint8_t c = 32;
-
-    for (uint8_t l = 0; l < 4; l++) {
-        ssd1306_setCursor(0, l * MULTIPLE);
-        i2c_startCommunication(OLED_ADDR);
-        i2c_writeByte(OLED_DAT_MODE);
-        
-        for (uint8_t p = 20; p; p--) {
-            ssd1306_printCharacter(c++);
-            if (c == 32 + 64) {
-                break;
-            }
-        }
-        i2c_stopCommunication();
     }
 }

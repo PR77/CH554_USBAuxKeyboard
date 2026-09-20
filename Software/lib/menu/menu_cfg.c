@@ -25,12 +25,12 @@
 #define NUMBER_OF_MENU_ENTERIES     (sizeof(menuEntries) / sizeof(menuEntry_s))
 
 const menuEntry_s menuEntries[] = {
-    {'h', "Display command overview",   menu_printCommandOverview},
-    {'d', "Dump CODE memory",           menu_dumpCODEMemory},
-    {'x', "Dump XDATA memory",          menu_dumpXDATAMemory},
-    {'n', "Dump NVM memory",            menu_dumpDataFlashMemory},
-    {'m', "Modify Hotkey map",          menu_modifyHotKeyMap},
-    {'r', "Reset",                      menu_coldReboot}
+	{'h', "Display command overview",   NULL,                                                                       menu_printCommandOverview},
+    {'d', "Dump CODE memory",           "\nUsage: d|D <uint16_t> start address of 32 byte CODE block\n",            menu_dumpCODEMemory},
+    {'x', "Dump XDATA memory",          "\nUsage: x|X <uint16_t> start address of 32 byte XDATA block\n",           menu_dumpXDATAMemory},
+    {'n', "Dump NVM memory",            "\nUsage: n|N Display 128 byte NVM block\n",                                menu_dumpDataFlashMemory},
+    {'m', "Modify Hotkey map",          "\nUsage: m|M <uint16_t> [MSB] Physical Hotkey [LSB] Hotkey Handler\n",		menu_modifyHotKeyMap},
+    {'r', "Reset",                      "\nUsage: r|R Perform a cold reboot\n",                                     menu_coldReboot}
 };
 
 inline uint8_t menu_getNumberOfMenuEnteries(void) {
@@ -41,6 +41,15 @@ void menu_printCommandPrompt(void) {
  
     console_printCharacter('\n');
     console_printCharacter(MENU_COMMAND_PROMPT_CHARACTER);
+}
+
+void menu_signalError(void) {
+  
+    console_printCharacter('\a');
+}
+
+void menu_printHelpText(uint8_t helpTextIndex) {
+    console_printString(menuEntries[helpTextIndex].helpText);
 }
 
 void menu_printCommandOverview(char *argument) {
@@ -58,19 +67,9 @@ void menu_printCommandOverview(char *argument) {
     }
 }
 
-void menu_signalError(void) {
-  
-    console_printCharacter('\a');
-}
-
 void menu_dumpCODEMemory(char *argument) {
     static uint16_t baseAddress = 0;
     
-    if ((argument != NULL) && (*argument == '?')) {
-        console_printString("\nUsage: d|D <uint16_t> start address of 32 byte CODE block\n");
-        return;
-    }
-
     console_printCharacter('\n');
 
     if (argument != NULL) {
@@ -85,11 +84,6 @@ void menu_dumpCODEMemory(char *argument) {
 void menu_dumpXDATAMemory(char *argument) {
     static uint16_t baseAddress = 0;
     
-    if ((argument != NULL) && (*argument == '?')) {
-        console_printString("\nUsage: x|X <uint16_t> start address of 32 byte XDATA block\n");
-        return;
-    }
-
     console_printCharacter('\n');
 
     if (argument != NULL) {
@@ -102,13 +96,10 @@ void menu_dumpXDATAMemory(char *argument) {
 }
 
 void menu_dumpDataFlashMemory(char *argument) {
+
+    (void)argument;
     uint8_t *dataFlashMirror = NULL;
     
-    if ((argument != NULL) && (*argument == '?')) {
-        console_printString("\nUsage: n|N Display 128 byte NVM block\n");
-        return;
-    }
-
     console_printCharacter('\n');
 
     dataFlashMirror = nvm_readDataFlashIntoMirror();
@@ -119,11 +110,6 @@ void menu_modifyHotKeyMap(char *argument) {
     
     uint8_t hotKeyMapIndex = 0, hotKeyMapValue = 0;
     
-    if ((argument != NULL) && (*argument == '?')) {
-        console_printString("\nUsage: m|M <uint16_t> [MSB] Physical Hotkey [LSB] Hotkey Handler\n");
-        return;
-    }
-
     console_printCharacter('\n');        
 
     if (argument == NULL) {
@@ -139,10 +125,6 @@ void menu_modifyHotKeyMap(char *argument) {
 
 void menu_coldReboot(char *argument) {
 
-    if ((argument != NULL) && (*argument == '?')) {
-        console_printString("\nUsage: r|R Perform a cold reboot\n");
-        return;
-    }
-
+    (void)argument;
     system_coldReboot();
 }

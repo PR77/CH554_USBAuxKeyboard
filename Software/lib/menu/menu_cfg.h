@@ -20,8 +20,9 @@ extern const menuEntry_s menuEntries[];
 
 inline uint8_t menu_getNumberOfMenuEnteries(void);
 void menu_printCommandPrompt(void);
-void menu_printCommandOverview(char *argument);
 void menu_signalError(void);
+void menu_printHelpText(uint8_t helpTextIndex);
+void menu_printCommandOverview(char *argument);
 void menu_dumpCODEMemory(char *argument);
 void menu_dumpXDATAMemory(char *argument);
 void menu_dumpDataFlashMemory(char *argument);

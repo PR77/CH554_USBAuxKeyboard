@@ -18,6 +18,7 @@
 typedef struct {
     char commandName;
     char *commandText;
+    char *helpText;
     void (*commandHandler)(char *argument);
 } menuEntry_s;
 

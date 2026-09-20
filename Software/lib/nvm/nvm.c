@@ -14,8 +14,8 @@
 #include "ch554.h"
 #include "nvm.h"
 
-__xdata int8_t lastValidBlock, nextFreeBlock;
-__xdata uint8_t dataFlashMirror[DATA_FLASH_SIZE_MAX];
+__xdata static int8_t nvm_lastValidBlock, nvm_nextFreeBlock;
+__xdata static uint8_t nvm_dataFlashMirror[DATA_FLASH_SIZE_MAX];
 
 // IMPORTANT: readBlock and writeBlock block size parameter defines the data only portion
 // size. 1 additional byte is appended to determine if a block is valid. This is part of
@@ -23,8 +23,8 @@ __xdata uint8_t dataFlashMirror[DATA_FLASH_SIZE_MAX];
 
 void nvm_initialise(void) {
 
-    nextFreeBlock = -1;
-    lastValidBlock = 0;
+    nvm_nextFreeBlock = -1;
+    nvm_lastValidBlock = 0;
 }
 
 __xdata uint8_t * nvm_readDataFlashIntoMirror(void) {
@@ -36,11 +36,11 @@ __xdata uint8_t * nvm_readDataFlashIntoMirror(void) {
         ROM_CTRL = ROM_CMD_READ;
 
         if ((ROM_STATUS & bROM_CMD_ERR) == 0) {
-	        dataFlashMirror[i] = ROM_DATA_L;
+	        nvm_dataFlashMirror[i] = ROM_DATA_L;
         }
     }
 
-    return (dataFlashMirror);
+    return (nvm_dataFlashMirror);
 }
 
 nvmStatus_e nvm_writeByte(uint8_t addressOffset, uint8_t data) {
@@ -80,9 +80,9 @@ nvmStatus_e nvm_readBlock(uint8_t *data, uint8_t size) {
         return (nvmSizeError);
     }
 
-    nextFreeBlock = nvm_findLastValidBlock(size);
+    nvm_nextFreeBlock = nvm_findLastValidBlock(size);
 
-    if (nextFreeBlock < 0) {
+    if (nvm_nextFreeBlock < 0) {
         // If there was an error finding the next free block, then return error.
         return (nvmNoValidBlockFound);
     }
@@ -91,7 +91,7 @@ nvmStatus_e nvm_readBlock(uint8_t *data, uint8_t size) {
     ROM_ADDR_H = DATA_FLASH_ADDR >> 8;
     
     for (uint8_t i = 0; i < size; i++) {
-        ROM_ADDR_L = (((nextFreeBlock * (size + 1)) + i) << 1);
+        ROM_ADDR_L = (((nvm_nextFreeBlock * (size + 1)) + i) << 1);
         ROM_CTRL = ROM_CMD_READ;
 
         if ((ROM_STATUS & bROM_CMD_ERR) == 0) {
@@ -117,20 +117,20 @@ nvmStatus_e nvm_writeBlock(const uint8_t *data, uint8_t size) {
         return (nvmSizeError);
     }
 
-    lastValidBlock = nvm_findLastValidBlock(size);
+    nvm_lastValidBlock = nvm_findLastValidBlock(size);
 
-    if (lastValidBlock < 0) {
+    if (nvm_lastValidBlock < 0) {
         // If there was no free valid block found, then start from block 0 again and
         // lastValidBlock is the last possible block.
-        nextFreeBlock = 0;
-        lastValidBlock = ((DATA_FLASH_SIZE_MAX / (size + 1)) - 1);
+        nvm_nextFreeBlock = 0;
+        nvm_lastValidBlock = ((DATA_FLASH_SIZE_MAX / (size + 1)) - 1);
     } else {
         // Otherwise set nextFreeBlock to the next block in the chain based on the
         // value of lastValidBlock.
-        nextFreeBlock = lastValidBlock + 1;
+        nvm_nextFreeBlock = nvm_lastValidBlock + 1;
 
-        if (nextFreeBlock > ((DATA_FLASH_SIZE_MAX / (size + 1)) - 1)) {
-            nextFreeBlock = 0;
+        if (nvm_nextFreeBlock > ((DATA_FLASH_SIZE_MAX / (size + 1)) - 1)) {
+            nvm_nextFreeBlock = 0;
         }
     }
     
@@ -149,7 +149,7 @@ nvmStatus_e nvm_writeBlock(const uint8_t *data, uint8_t size) {
     do {
         // Write data payload to the start of the next free block.
         for (uint8_t i = 0; i < size; i++) {
-            result = nvm_writeByte(((nextFreeBlock * (size + 1)) + i), data[i]);
+            result = nvm_writeByte(((nvm_nextFreeBlock * (size + 1)) + i), data[i]);
             
             if (result != nvmOk) {
                 break;
@@ -157,14 +157,14 @@ nvmStatus_e nvm_writeBlock(const uint8_t *data, uint8_t size) {
         }
 
         // Write DATA_FLASH_BLOCK_VALID to the end of the next free block.
-        result = nvm_writeByte(((nextFreeBlock * (size + 1)) + size), DATA_FLASH_BLOCK_VALID);
+        result = nvm_writeByte(((nvm_nextFreeBlock * (size + 1)) + size), DATA_FLASH_BLOCK_VALID);
 
         if (result != nvmOk) {
             break;
         }
 
         // Write DATA_FLASH_BLOCK_INVALID to the end of the previous block.
-        result = nvm_writeByte(((lastValidBlock * (size + 1)) + size), DATA_FLASH_BLOCK_INVALID);
+        result = nvm_writeByte(((nvm_lastValidBlock * (size + 1)) + size), DATA_FLASH_BLOCK_INVALID);
     } while (0);
 
     SAFE_MOD = 0x55;

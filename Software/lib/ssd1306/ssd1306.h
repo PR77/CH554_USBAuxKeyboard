@@ -11,6 +11,10 @@
 #define __CH554_SSD1306_H__
 
 #include <stdint.h>
+#include <compiler.h>
+#include <string.h>
+#include <stdlib.h>
+#include <stdbool.h>
 #include "ch554.h"
 
 // OLED definitions
@@ -46,12 +50,12 @@
 void ssd1306_initialise(void);
 void ssd1306_verticalShift(uint8_t yPosition);
 void ssd1306_drawBmp(uint8_t xPosition, uint8_t yPosition, uint8_t xSize, uint8_t ySize, const uint8_t* bmpData);
+void ssd1306_setClearInvert(bool invert);
 void ssd1306_printCharacter(char character);
 void ssd1306_printString(char* string);
 void ssd1306_printHexByte(uint8_t value);
 void ssd1306_printHexWord(uint16_t value);
 void ssd1306_setCursor(uint8_t xPosition, uint8_t yPosition);
 void ssd1306_clearScreen(void);
-void ssd1306_test(void);
 
 #endif // __CH554_SSD1306_H__

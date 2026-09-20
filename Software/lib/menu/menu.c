@@ -46,8 +46,14 @@ void menu_processCommand(void) {
     for (uint8_t i = 0; i < menu_getNumberOfMenuEnteries(); i++) {
         if ((command[0] | 0x20) == menuEntries[i].commandName) {
             // Since commands are only 1 character, check the first character only.
-            // Additionally, OR the command character (ASCII) with 0x20 to allow for
-            // case to be ignored. Lowercase has a higher ASCII value (offset of 0x20).
+            // ORing the command character (ASCII) with 0x20 ignore the case. Lowercase
+            // has a higher ASCII value (offset of 0x20).
+
+            if ((argument != NULL) && (*argument == '?')) {
+                menu_printHelpText(i);
+                break;
+            }
+
             if (menuEntries[i].commandHandler != NULL) {
                 menuEntries[i].commandHandler(argument);
             }
@@ -59,6 +65,7 @@ void menu_processCommand(void) {
 } 
 
 void menu_cyclicHandler(char character) {
+    
      if (character == '\r') {
         menu_commandBuffer[menu_commandBufferIndex] = 0;
         menu_processCommand();
