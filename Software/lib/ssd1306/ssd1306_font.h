@@ -15,7 +15,10 @@
 
 #undef OLED_FONT_SUPPORT_LOWER_CASE
 
-#define OLED_FONT_CHAR_COUNT (sizeof(OLED_FONT) / (5 * sizeof(OLED_FONT[0])))
+#define OLED_FONT_HEIGHT        8
+#define OLED_FONT_WIDTH         5
+#define OLED_FONT_FIRST_CHAR    0x20
+#define OLED_FONT_CHAR_COUNT    (sizeof(OLED_FONT) / (OLED_FONT_WIDTH * sizeof(OLED_FONT[0])))
 
 // Standard ASCII 5x8 font (adapted from Neven Boyanov and Stephen Denne)
 static const uint8_t OLED_FONT[] = {

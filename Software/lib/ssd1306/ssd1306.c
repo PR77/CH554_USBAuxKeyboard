@@ -41,9 +41,6 @@
 #define MULTIPLE            2
 #endif
 
-#define OLED_FONT_WIDTH     5
-#define OLED_FONT_HEIGHT    8
-
 // -----------------------------------------------------------------------------
 // OLED Implementation
 // -----------------------------------------------------------------------------
@@ -132,13 +129,12 @@ void ssd1306_printCharacter(char character) {
     uint16_t offset = 0;
     uint8_t columnData = 0;
 
-    if ((character >= 32) && (character < (OLED_FONT_CHAR_COUNT + 32))) {
-        offset = character - 32;
+    if ((character >= OLED_FONT_FIRST_CHAR) && (character < (OLED_FONT_CHAR_COUNT + OLED_FONT_FIRST_CHAR))) {
+        offset = (character - OLED_FONT_FIRST_CHAR) * OLED_FONT_WIDTH;
     } else {
         return;
     }
 
-    offset += offset << 2;                  // -> offset = (ch - 32) * 5
     i2c_startCommunication(OLED_ADDR);
     i2c_writeByte(OLED_DAT_MODE);    
 
