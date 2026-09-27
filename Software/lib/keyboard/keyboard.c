@@ -12,12 +12,12 @@
 #include <string.h>
 #include <stdlib.h>
 #include "ch554.h"
+#include "console.h"
 #include "keyboard.h"
 #include "keyboard_cfg.h"
 #include "keyboard_layout.h"
 #include "system.h"
 #include "tick.h"
-#include "serial.h"
 
 SBIT(KBCLOCK, KBCLOCK_PORT, KBCLOCK_PIN);
 SBIT(KBDATA, KBDATA_PORT, KBDATA_PIN);
@@ -270,11 +270,11 @@ static void keyboard_queueKey(uint8_t amigaKeyCode, keyboardKey_e pressedRelease
     keyCodeToQueue |= (pressedReleased == kbKeyPressed) ? 0x00 : 0x01;
 
 #if defined(KEYBOARD_DEBUG_ENABLED)
-    serial_printString("KEY Queued: Index: ");
-    serial_printHexByte(((keyboard_queueWriteIndex - keyboard_queueReadIndex) & KEY_QUEUE_BUFFER_MASK));
-    serial_printString(", Keycode: ");
-    serial_printHexByte(keyCodeToQueue);
-    serial_printCharacter('\n');
+    console_printString("KEY Queued: Index: ");
+    console_printHexByte(((keyboard_queueWriteIndex - keyboard_queueReadIndex) & KEY_QUEUE_BUFFER_MASK));
+    console_printString(", Keycode: ");
+    console_printHexByte(keyCodeToQueue);
+    console_printCharacter('\n');
 #endif
 
     keyboard_queueKeyBuffer[keyboard_queueWriteIndex] = keyCodeToQueue;

@@ -12,7 +12,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "ch554.h"
-#include "serial.h"
+#include "console.h"
 #include "quadrature.h"
 #include "quadrature_cfg.h"
 
@@ -129,13 +129,13 @@ void quadrature_updateCounts(uint8_t channelIndex, int8_t counts) {
     }
 
 #if defined(QUADRATURE_DEBUG_ENABLED)
-    serial_printString("Ch #: ");
-    serial_printHexByte(channelIndex);
-    serial_printString(", Dir: ");
-    serial_printHexByte(quadratureOutputs[channelIndex].direction);
-    serial_printString(", Counts: ");
-    serial_printHexByte(abs(counts));
-    serial_printCharacter('\n');
+    console_printString("Ch #: ");
+    console_printHexByte(channelIndex);
+    console_printString(", Dir: ");
+    console_printHexByte(quadratureOutputs[channelIndex].direction);
+    console_printString(", Counts: ");
+    console_printHexByte(abs(counts));
+    console_printCharacter('\n');
 #endif
 
     quadratureOutputs[channelIndex].sequenceCounts += abs(counts);
