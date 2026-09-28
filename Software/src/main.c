@@ -153,16 +153,6 @@ void main(void) {
         }
     }
 
-    if (bootloader_checkBootloaderRequest()) {
-        ws2812_initialise();
-        ws2812_updatePixels();
-        usbhid_deinitialise();
-        ssd1306_clearScreen();
-        ssd1306_setCursor(0, 0);
-        ssd1306_printString("---- BOOT LOADER ----");
-        bootloader_enter();
-    }
-
     // Cyclic loop application code starts here
     while (1) {
 #if defined (CONSOLE_OVER_SERIAL) || defined(CONSOLE_OVER_USB)

@@ -14,6 +14,8 @@
 
 #include <stdint.h>
 #include <compiler.h>
+#include <string.h>
+#include <stdlib.h>
 #include "ch554.h"
 #include "system.h"
 
@@ -68,6 +70,67 @@ inline void system_disableGlobalInterupts(void) {
     
     if (EA == 1) {
         EA = 0;                     // only if already enabled, then disable global interrupts
+    }
+}
+
+/*******************************************************************************
+* Function Name  : system_initialiseRunTimeMeasurement(runTimeData)
+* Description    : initialises run time measurement structures
+* Input          : runTimeMeasurement_t
+* Output         : None
+* Return         : None
+*******************************************************************************/
+void system_initialiseRunTimeMeasurement(runTimeMeasurement_t *runTimeData) {
+
+    if (runTimeData == NULL) {
+        return;
+    }
+
+    runTimeData->cycleCount = 0;
+    runTimeData->startTime = 0;
+    runTimeData->currentTime = 0;
+    runTimeData->maximumTime = 0;
+    runTimeData->totalTime = 0;
+}
+
+/*******************************************************************************
+* Function Name  : system_runTimeMeasurementStart(runTimeData, counter)
+* Description    : starts run time measurement
+* Input          : runTimeMeasurement_t, uint32_t
+* Output         : None
+* Return         : None
+*******************************************************************************/
+void system_runTimeMeasurementStart(runTimeMeasurement_t *runTimeData, uint32_t value) {
+    
+    if (runTimeData == NULL) {
+        return;
+    }
+
+    runTimeData->startTime = value;
+}
+
+/*******************************************************************************
+* Function Name  : system_runTimeMeasurementStop(runTimeData, counter)
+* Description    : stops run time measurement
+* Input          : runTimeMeasurement_t, uint32_t
+* Output         : runTimeData updates with metrics
+* Return         : None
+*******************************************************************************/
+void system_runTimeMeasurementStop(runTimeMeasurement_t *runTimeData, uint32_t value) {
+    uint32_t elapsedTime = 0;
+
+    if (runTimeData == NULL) {
+        return;
+    }
+
+    elapsedTime = value - runTimeData->startTime;
+
+    runTimeData->cycleCount++;
+    runTimeData->currentTime = elapsedTime;
+    runTimeData->totalTime += elapsedTime;
+
+    if (elapsedTime > runTimeData->maximumTime) {
+        runTimeData->maximumTime = elapsedTime;
     }
 }
 

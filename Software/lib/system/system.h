@@ -16,12 +16,24 @@
 #define __CH554_SYSTEM_H__
 
 #include <stdint.h>
+#include <stdbool.h>
 #include "ch554.h"
+
+typedef struct {
+    uint32_t cycleCount;
+    uint32_t startTime;
+    uint32_t currentTime;
+    uint32_t maximumTime;
+    uint32_t totalTime;
+} runTimeMeasurement_t;
 
 void system_CfgFsys(void);
 inline void system_restoreGlobalInterupts(void);
 inline void system_enableGlobalInterupts(void);
 inline void system_disableGlobalInterupts(void);
+void system_initialiseRunTimeMeasurement(runTimeMeasurement_t *runTimeData);
+void system_runTimeMeasurementStart(runTimeMeasurement_t *runTimeData, uint32_t value);
+void system_runTimeMeasurementStop(runTimeMeasurement_t *runTimeData, uint32_t value);
 void system_mDelayuS(uint16_t n);
 void system_mDelaymS(uint16_t n);
 inline void system_WDTModeSelect(uint8_t mode);
