@@ -190,7 +190,7 @@ void ws2812_setPixelWheelColour(uint8_t pixel, uint8_t wheelPosition) {
 
     if (wheelPosition < 85) {
         targetColour.red = (wheelPosition * 3);
-        targetColour.blue = (255 - wheelPosition);
+        targetColour.blue = 255 - (wheelPosition * 3);
         targetColour.green = 0;
     }
     else if (wheelPosition < 170) {
