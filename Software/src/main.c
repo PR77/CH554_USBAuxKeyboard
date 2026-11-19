@@ -71,7 +71,6 @@ void main(void) {
 
     // Setup timer ticks
     tick_initialiseTimer0();
-    tick_enableTimer0Interrupt();
 
 #if !defined(CONSOLE_OVER_USB) && defined (CONSOLE_OVER_SERIAL)
     // Setup serial port (debug)
