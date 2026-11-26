@@ -172,7 +172,7 @@ void ws2812_displayFullWheelColour(ws2812Brightness_e brightness) {
 
 void ws2812_updatePixels(void) {
 
-    for (uint8_t i = 0; i < WS2812_PIXEL_COUNT * WS2812_BYTES_PER_PIXEL; i++) {
+    for (uint16_t i = 0; i < WS2812_PIXEL_COUNT * WS2812_BYTES_PER_PIXEL; i++) {
         system_disableGlobalInterupts();
         ws2812_sendByte(ws2812_pixelBuffer[i]);    
         system_restoreGlobalInterupts();
