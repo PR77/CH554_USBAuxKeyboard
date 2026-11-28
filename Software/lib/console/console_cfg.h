@@ -34,7 +34,7 @@
 #elif defined(CONSOLE_OVER_USB)
 #define CONSOLE_PORT_PUTCHR(x)      usbcdc_printCharacter(x)
 #else 
-#error No valid definition of CONSOLE_PORT_PUTCHR
+#define CONSOLE_PORT_PUTCHR(x)      (x)
 #endif // CONSOLE_OVER_SERIAL else CONSOLE_OVER_USB
 #endif
 
@@ -43,8 +43,8 @@
 #define CONSOLE_PORT_FLUSH(x)
 #elif defined(CONSOLE_OVER_USB)
 #define CONSOLE_PORT_FLUSH(x)       usbcdc_flushTransmitBuffer(x)
-#else 
-#error No valid definition of CONSOLE_PORT_FLUSH
+#else
+#define CONSOLE_PORT_FLUSH(x)
 #endif // CONSOLE_OVER_SERIAL else CONSOLE_OVER_USB
 #endif
 
@@ -54,7 +54,7 @@
 #elif defined(CONSOLE_OVER_USB)
 #define CONSOLE_PORT_GETCHR(x)      usbcdc_getCharacter(x)
 #else 
-#error No valid definition of CONSOLE_PORT_GETCHR
+#define CONSOLE_PORT_GETCHR(x)      (x)
 #endif // CONSOLE_OVER_SERIAL else CONSOLE_OVER_USB
 #endif
 
